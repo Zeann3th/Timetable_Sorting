@@ -38,25 +38,27 @@ df1["Phòng"] = df1["Phòng"].astype(str)
 group_num = []
 
 
-def grouping_location(dataframe, rooms):
-  if any(substring in room for substring in ["D3", "D5"]):
-      return 0
-  elif any(substring in room for substring in ["D9"]):
-      return 1
-  elif any(substring in room for substring in ["C3", "C4", "C5", "C6", "C7", "C8", "C10"]):
-      return 2
-  elif any(substring in room for substring in ["C1", "C2", "C9"]):
-      return 3
-  elif any(substring in room for substring in ["D4", "D6", "D8"]):
-      return 4
-  elif any(substring in room for substring in ["B1", "B3", "B4", "B6", "B7", "B8", "B9", "B10", "B13"]):
-      return 5
-  elif any(substring in room for substring in ["TC"]):
-      return 6
+def grouping_location(_room):
+  if any(substring in _room for substring in ["D3", "D5"]):
+    return 0
+  elif any(substring in _room for substring in ["D9"]):
+    return 1
+  elif any(substring in _room for substring in ["C3", "C4", "C5", "C6", "C7", "C8", "C10"]):
+    return 2
+  elif any(substring in _room for substring in ["C1", "C2", "C9"]):
+    return 3
+  elif any(substring in _room for substring in ["D4", "D6", "D8"]):
+    return 4
+  elif any(substring in _room for substring in ["B1", "B3", "B4", "B6", "B7", "B8", "B9", "B10", "B13"]):
+    return 5
+  elif any(substring in _room for substring in ["TC"]):
+    return 6
   else:
-      return 7
+    return 7
+
+
 for room in (df1["Phòng"].to_numpy().tolist()):
-  group_num.append(grouping_location(df1, room))
+  group_num.append(grouping_location(room))
 df1.insert(loc=11, column="Khu", value=group_num)
 del df1["Phòng"]
 # Dictionary of chosen classIDs
@@ -86,37 +88,39 @@ Dist = np.array([[0, 5, 5, 10, 10, 5, 10],  # D3, D5, D3-5
                  [10, 10, 10, 10, 10, 5, 0]  # TC =)))
                 ])
 # Calculate initial solution
-calendar = np.zeros((9,3000))
+calendar = np.zeros((9, 3000))
 initial_solution = []
 # TODO Fix the `check` function so that if it backtracks, it reverts the `calendar` variable
-def check(class_id, calendar):
+
+
+def check(class_id, _calendar):
     flag = 0
     row = df1["Mã lớp"] == str(class_id)
-    date = int(df1.loc[row,"Thứ"])
-    start = int(df1.loc[row,"Bắt đầu"])
-    end = int(df1.loc[row,"Kết thúc"])
+    date = int(df1.loc[row, "Thứ"])
+    start = int(df1.loc[row, "Bắt đầu"])
+    end = int(df1.loc[row, "Kết thúc"])
     for i in range(start, end+1):
-        if calendar[date][i] == 0:
-            calendar[date][i] = 1
+        if _calendar[date][i] == 0:
+            _calendar[date][i] = 1
             flag += 1
     if flag < end-start+1:
         return False
     return True
 
 
-def Try(k, tmplist):
+def Try(k, templist):
     global initial_solution
     if k == len(maHPs):
-        initial_solution = tmplist.copy()
+        initial_solution = templist.copy()
         return
     key = list(maHPs.keys())[k]
     for maHP_loop in maHPs[key]:
         if check(maHP_loop, calendar):
-            tmplist.append(maHP_loop)
-            Try(k+1, tmplist)
+            templist.append(maHP_loop)
+            Try(k+1, templist)
             if initial_solution:
                 return
-            tmplist.pop()
+            templist.pop()
 # Output!!!
 
 
