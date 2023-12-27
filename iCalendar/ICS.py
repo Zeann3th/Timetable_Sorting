@@ -1,5 +1,5 @@
 from icalendar import Calendar, Event
-from TimeTable_Query import TimeTable as Tt
+import TimeTable as Tt
 import datetime as dt
 
 cal = Calendar()
