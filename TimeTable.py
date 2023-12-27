@@ -14,7 +14,7 @@ cols = ["Kỳ", "Trường_Viện_Khoa", "Mã lớp", "Mã lớp kèm", "Mã HP"
         "Tên HP Tiếng Anh", "Khối lượng", "Ghi chú", "Buổi số", "Thứ", "Thời gian",
         "Bắt đầu", "Kết thúc", "Kíp", "Tuần", "Phòng", "Cần thí nghiệm", "Số lượng đăng ký",
         "Số lượng max", "Trạng thái", "Loại lớp", "Đợt mở", "Mã quản lý"]
-df = pd.read_excel(filename, index_col=0, names=cols)
+df = pd.read_excel(filename, names=cols)
 
 df = df.iloc[2:]  # Delete title rows
 df.reset_index(inplace=True, drop=True)
