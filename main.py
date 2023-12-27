@@ -1,11 +1,12 @@
 from icalendar import Calendar, Event
-from TimeTable_Query import TimeTable as Tt
+import TimeTable as Tt
 import datetime as dt
+import tkinter as tk
 
 cal = Calendar()
 
 
-def export_to_ics(solution: list):
+def export_to_ics(solution: list, date_start: dt.datetime):
     year = int(Tt.df["Kỳ"].iloc[0][:4])
     for class_id in solution:
         event = Event()
@@ -24,5 +25,6 @@ def export_to_ics(solution: list):
 
 
 export_to_ics(Tt.initial_solution)
-with open("google_calendar.ics", "w", encoding="utf-8") as f:
+with open("iCalendar/google_calendar.ics", "w", encoding="utf-8") as f:
     f.write(cal.to_ical().decode("utf-8"))
+    print("Done! The iCalendar file is saved to iCalendar/google_calendar.ics")
