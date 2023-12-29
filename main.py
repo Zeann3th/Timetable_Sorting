@@ -24,5 +24,6 @@ def export_to_ics(solution: list):
 
 
 export_to_ics(Tt.initial_solution)
-with open("google_calendar.ics", "w", encoding="utf-8") as f:
+with open("iCalendar/google_calendar.ics", "w", encoding="utf-8") as f:
     f.write(cal.to_ical().decode("utf-8"))
+    print("Done! The iCalendar file is saved to iCalendar/google_calendar.ics")

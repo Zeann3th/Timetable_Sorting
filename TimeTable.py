@@ -39,36 +39,59 @@ group_num = []
 
 
 def grouping_location(_room):
-  if any(substring in _room for substring in ["D3", "D5"]):
-    return 0
-  elif any(substring in _room for substring in ["D9"]):
-    return 1
-  elif any(substring in _room for substring in ["C3", "C4", "C5", "C6", "C7", "C8", "C10"]):
-    return 2
-  elif any(substring in _room for substring in ["C1", "C2", "C9"]):
-    return 3
-  elif any(substring in _room for substring in ["D4", "D6", "D8"]):
-    return 4
-  elif any(substring in _room for substring in ["B1", "B3", "B4", "B6", "B7", "B8", "B9", "B10", "B13"]):
-    return 5
-  elif any(substring in _room for substring in ["TC"]):
-    return 6
-  else:
+    if any(substring in _room for substring in ["D3", "D5"]):
+        return 0
+    elif any(substring in _room for substring in ["D9"]):
+        return 1
+    elif any(substring in _room for substring in ["C3", "C4", "C5", "C6", "C7", "C8", "C10"]):
+        return 2
+    elif any(substring in _room for substring in ["C1", "C2", "C9"]):
+        return 3
+    elif any(substring in _room for substring in ["D4", "D6", "D8"]):
+        return 4
+    elif any(substring in _room for substring in ["B1", "B3", "B4", "B6", "B7", "B8", "B9", "B10", "B13"]):
+        return 5
+    elif any(substring in _room for substring in ["TC"]):
+        return 6
+    else:
+        return 7
+
+
+def new_grouping_location(_room):
+    building = _room[:2] if _room[2] == "-" else _room[:3]
+    if building in ["D3", "D5"]:
+        return 0
+    if building in ["D9", "D7"]:
+        return 1
+    if building in ["C3", "C4", "C5", "C6", "C7", "C8", "C10"]:
+        return 2
+    if building in ["C1", "C2", "C9"]:
+        return 3
+    if building in ["D4", "D6", "D8"]:
+        return 4
+    if building in ["B1", "B3", "B4", "B6", "B7", "B8", "B9", "B10", "B13"]:
+        return 5
+    if building in ["TC"]:
+        return 6
     return 7
 
 
 for room in (df1["Phòng"].to_numpy().tolist()):
-  group_num.append(grouping_location(room))
+    group_num.append(new_grouping_location(room))
+
 df1.insert(loc=11, column="Khu", value=group_num)
 del df1["Phòng"]
 # Dictionary of chosen classIDs
 maHPs = {}
 maHP = ""
-print("Hãy nhập vào mã học phần của môn học bạn định đăng ký: ")
+# Need to move this to main.py
+print("Hãy nhập vào mã học phần của môn học bạn định đăng ký, kết thúc bằng dấu *: ")
 while maHP != "*":
     maHP = input()
     if maHP not in df1["Mã HP"].to_numpy().tolist():
-      continue
+        if (maHP != "*"):
+            print(f"Không tồn tại mã học phần {maHP}")
+        continue
     if maHP not in maHPs:
         dfx = df1[df1["Mã HP"] == maHP]
         dfx = dfx[dfx["Loại lớp"].isin(["BT", "LT+BT"])]
@@ -76,6 +99,7 @@ while maHP != "*":
         # filtered_classes_ID = [int(class_id) for class_id in filtered_classes_ID]
         maHPs[maHP] = filtered_classes_ID
 # Output will only have "BT" or "LT+BT" labeled classes
+# TODO: Create new filters for classes labeled as "TN"
 # Enter "*" to stop
 
 # Distance matrix
@@ -110,6 +134,7 @@ def check(class_id, _calendar):
 
 def Try(k, templist):
     global initial_solution
+    initial_solution = []
     if k == len(maHPs):
         initial_solution = templist.copy()
         return
@@ -119,7 +144,7 @@ def Try(k, templist):
             templist.append(maHP_loop)
             Try(k+1, templist)
             if initial_solution:
-                return
+                return initial_solution
             templist.pop()
 # Output!!!
 
