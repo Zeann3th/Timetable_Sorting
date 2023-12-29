@@ -1,12 +1,11 @@
 from icalendar import Calendar, Event
 import TimeTable as Tt
 import datetime as dt
-import tkinter as tk
 
 cal = Calendar()
 
 
-def export_to_ics(solution: list, date_start: dt.datetime):
+def export_to_ics(solution: list):
     year = int(Tt.df["Kỳ"].iloc[0][:4])
     for class_id in solution:
         event = Event()

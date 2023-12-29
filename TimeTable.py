@@ -89,7 +89,9 @@ print("Hãy nhập vào mã học phần của môn học bạn định đăng k
 while maHP != "*":
     maHP = input()
     if maHP not in df1["Mã HP"].to_numpy().tolist():
-      print(f"Không tồn tại mã học phần {maHP}")
+        if (maHP != "*"):
+            print(f"Không tồn tại mã học phần {maHP}")
+        continue
     if maHP not in maHPs:
         dfx = df1[df1["Mã HP"] == maHP]
         dfx = dfx[dfx["Loại lớp"].isin(["BT", "LT+BT"])]
@@ -132,6 +134,7 @@ def check(class_id, _calendar):
 
 def Try(k, templist):
     global initial_solution
+    initial_solution = []
     if k == len(maHPs):
         initial_solution = templist.copy()
         return
@@ -141,7 +144,7 @@ def Try(k, templist):
             templist.append(maHP_loop)
             Try(k+1, templist)
             if initial_solution:
-                return
+                return initial_solution
             templist.pop()
 # Output!!!
 
