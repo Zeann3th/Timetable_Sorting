@@ -1,6 +1,7 @@
 from icalendar import Calendar, Event
 import TimeTable as Tt
 import datetime as dt
+import ui_package.ui_components as ui
 
 cal = Calendar()
 

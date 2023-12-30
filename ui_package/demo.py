@@ -8,10 +8,6 @@
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-################################################################################
-## A/N: Run this file will only show the mock UI, nothing else
-################################################################################
-
 from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
     QMetaObject, QObject, QPoint, QRect,
     QSize, QTime, QUrl, Qt)
@@ -23,30 +19,50 @@ from PySide6.QtWidgets import (QAbstractItemView, QAbstractScrollArea, QAbstract
     QCalendarWidget, QComboBox, QDateEdit, QFormLayout,
     QFrame, QGroupBox, QHBoxLayout, QHeaderView,
     QLabel, QLineEdit, QListView, QMainWindow,
-    QMenuBar, QPushButton, QRadioButton, QSizePolicy,
-    QSpacerItem, QStackedWidget, QStatusBar, QTableWidget,
-    QTableWidgetItem, QVBoxLayout, QWidget)
+    QMenuBar, QProgressBar, QPushButton, QRadioButton,
+    QSizePolicy, QSpacerItem, QStackedWidget, QStatusBar,
+    QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(1053, 810)
+        MainWindow.resize(1018, 775)
         MainWindow.setStyleSheet(u"QMainWindow > QWidget {\n"
 "	background: #FFFBF5;\n"
+"}\n"
+"\n"
+"QPushButton {\n"
+"	border: 1px solid black;\n"
 "}")
         MainWindow.setUnifiedTitleAndToolBarOnMac(False)
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.verticalLayout_9 = QVBoxLayout(self.centralwidget)
         self.verticalLayout_9.setObjectName(u"verticalLayout_9")
-        self.label_7 = QLabel(self.centralwidget)
-        self.label_7.setObjectName(u"label_7")
+        self.progressBar = QProgressBar(self.centralwidget)
+        self.progressBar.setObjectName(u"progressBar")
         font = QFont()
-        font.setPointSize(16)
-        self.label_7.setFont(font)
+        font.setPointSize(13)
+        self.progressBar.setFont(font)
+        self.progressBar.setStyleSheet(u"QProgressBar{\n"
+"	border: 1px solid black;\n"
+"	border-radius: 10px;\n"
+"	text-align: center;\n"
+"	background: #C3ACD0;\n"
+"	color: white;\n"
+"}\n"
+"QProgressBar::chunk{\n"
+"	background: #7743DB;\n"
+"	border-radius: 10px;\n"
+"}\n"
+"\n"
+"")
+        self.progressBar.setMaximum(3)
+        self.progressBar.setValue(1)
+        self.progressBar.setTextDirection(QProgressBar.TopToBottom)
 
-        self.verticalLayout_9.addWidget(self.label_7)
+        self.verticalLayout_9.addWidget(self.progressBar)
 
         self.stackedWidget = QStackedWidget(self.centralwidget)
         self.stackedWidget.setObjectName(u"stackedWidget")
@@ -59,23 +75,21 @@ class Ui_MainWindow(object):
         self.frame_3 = QFrame(self.page)
         self.frame_3.setObjectName(u"frame_3")
         self.frame_3.setMaximumSize(QSize(16777215, 16777215))
-        font1 = QFont()
-        font1.setPointSize(13)
-        self.frame_3.setFont(font1)
+        self.frame_3.setFont(font)
         self.frame_3.setFrameShape(QFrame.NoFrame)
         self.frame_3.setFrameShadow(QFrame.Plain)
         self.verticalLayout_4 = QVBoxLayout(self.frame_3)
         self.verticalLayout_4.setObjectName(u"verticalLayout_4")
         self.frame_1 = QFrame(self.frame_3)
         self.frame_1.setObjectName(u"frame_1")
-        self.frame_1.setFont(font1)
+        self.frame_1.setFont(font)
         self.frame_1.setFrameShape(QFrame.NoFrame)
         self.frame_1.setFrameShadow(QFrame.Plain)
         self.horizontalLayout = QHBoxLayout(self.frame_1)
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.label = QLabel(self.frame_1)
         self.label.setObjectName(u"label")
-        self.label.setFont(font1)
+        self.label.setFont(font)
 
         self.horizontalLayout.addWidget(self.label)
 
@@ -90,7 +104,7 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.pushButton.sizePolicy().hasHeightForWidth())
         self.pushButton.setSizePolicy(sizePolicy)
-        self.pushButton.setFont(font1)
+        self.pushButton.setFont(font)
         self.pushButton.setCursor(QCursor(Qt.PointingHandCursor))
         self.pushButton.setStyleSheet(u"QPushButton {\n"
 "	border-radius: 10px;\n"
@@ -111,7 +125,7 @@ class Ui_MainWindow(object):
 
         self.groupBox = QGroupBox(self.frame_3)
         self.groupBox.setObjectName(u"groupBox")
-        self.groupBox.setFont(font1)
+        self.groupBox.setFont(font)
         self.groupBox.setFlat(True)
         self.groupBox.setCheckable(False)
         self.verticalLayout_3 = QVBoxLayout(self.groupBox)
@@ -139,7 +153,7 @@ class Ui_MainWindow(object):
         sizePolicy1.setVerticalStretch(0)
         sizePolicy1.setHeightForWidth(self.tableWidget.sizePolicy().hasHeightForWidth())
         self.tableWidget.setSizePolicy(sizePolicy1)
-        self.tableWidget.setFont(font1)
+        self.tableWidget.setFont(font)
         self.tableWidget.setStyleSheet(u"QTableView{\n"
 "	background-color: #F7EFE5;\n"
 "	border-top-right-radius: 10px;\n"
@@ -205,15 +219,9 @@ class Ui_MainWindow(object):
         self.frame_5.setFrameShadow(QFrame.Raised)
         self.verticalLayout_6 = QVBoxLayout(self.frame_5)
         self.verticalLayout_6.setObjectName(u"verticalLayout_6")
-        self.frame_6 = QFrame(self.frame_5)
-        self.frame_6.setObjectName(u"frame_6")
-        self.frame_6.setFrameShape(QFrame.StyledPanel)
-        self.frame_6.setFrameShadow(QFrame.Raised)
-        self.verticalLayout_8 = QVBoxLayout(self.frame_6)
-        self.verticalLayout_8.setObjectName(u"verticalLayout_8")
-        self.groupBox_4 = QGroupBox(self.frame_6)
+        self.groupBox_4 = QGroupBox(self.frame_5)
         self.groupBox_4.setObjectName(u"groupBox_4")
-        self.groupBox_4.setFont(font1)
+        self.groupBox_4.setFont(font)
         self.groupBox_4.setFlat(True)
         self.groupBox_4.setCheckable(False)
         self.verticalLayout_7 = QVBoxLayout(self.groupBox_4)
@@ -239,7 +247,7 @@ class Ui_MainWindow(object):
         sizePolicy2.setVerticalStretch(0)
         sizePolicy2.setHeightForWidth(self.tableWidget_2.sizePolicy().hasHeightForWidth())
         self.tableWidget_2.setSizePolicy(sizePolicy2)
-        self.tableWidget_2.setFont(font1)
+        self.tableWidget_2.setFont(font)
         self.tableWidget_2.setStyleSheet(u"QTableView{\n"
 "	background-color: #F7EFE5;\n"
 "	border-top-left-radius: 10px;\n"
@@ -299,12 +307,12 @@ class Ui_MainWindow(object):
         sizePolicy3.setVerticalStretch(0)
         sizePolicy3.setHeightForWidth(self.frame.sizePolicy().hasHeightForWidth())
         self.frame.setSizePolicy(sizePolicy3)
-        self.frame.setFont(font1)
+        self.frame.setFont(font)
         self.formLayout = QFormLayout(self.frame)
         self.formLayout.setObjectName(u"formLayout")
         self.label_2 = QLabel(self.frame)
         self.label_2.setObjectName(u"label_2")
-        self.label_2.setFont(font1)
+        self.label_2.setFont(font)
 
         self.formLayout.setWidget(1, QFormLayout.LabelRole, self.label_2)
 
@@ -312,7 +320,7 @@ class Ui_MainWindow(object):
         self.pushButton_3.setObjectName(u"pushButton_3")
         sizePolicy.setHeightForWidth(self.pushButton_3.sizePolicy().hasHeightForWidth())
         self.pushButton_3.setSizePolicy(sizePolicy)
-        self.pushButton_3.setFont(font1)
+        self.pushButton_3.setFont(font)
         self.pushButton_3.setCursor(QCursor(Qt.PointingHandCursor))
         self.pushButton_3.setStyleSheet(u"QPushButton {\n"
 "	border-radius: 10px;\n"
@@ -329,7 +337,7 @@ class Ui_MainWindow(object):
 
         self.lineEdit_3 = QLineEdit(self.frame)
         self.lineEdit_3.setObjectName(u"lineEdit_3")
-        self.lineEdit_3.setFont(font1)
+        self.lineEdit_3.setFont(font)
         self.lineEdit_3.setStyleSheet(u"QLineEdit{\n"
 "	background: #F7EFE5;\n"
 "	border-radius: 10px;\n"
@@ -345,21 +353,18 @@ class Ui_MainWindow(object):
         self.verticalLayout_7.addWidget(self.frame)
 
 
-        self.verticalLayout_8.addWidget(self.groupBox_4)
-
-
-        self.verticalLayout_6.addWidget(self.frame_6)
+        self.verticalLayout_6.addWidget(self.groupBox_4)
 
         self.groupBox_3 = QGroupBox(self.frame_5)
         self.groupBox_3.setObjectName(u"groupBox_3")
-        self.groupBox_3.setFont(font1)
+        self.groupBox_3.setFont(font)
         self.groupBox_3.setFlat(True)
         self.groupBox_3.setCheckable(True)
         self.formLayout_2 = QFormLayout(self.groupBox_3)
         self.formLayout_2.setObjectName(u"formLayout_2")
         self.label_4 = QLabel(self.groupBox_3)
         self.label_4.setObjectName(u"label_4")
-        self.label_4.setFont(font1)
+        self.label_4.setFont(font)
 
         self.formLayout_2.setWidget(0, QFormLayout.LabelRole, self.label_4)
 
@@ -369,7 +374,7 @@ class Ui_MainWindow(object):
         self.comboBox_2.addItem("")
         self.comboBox_2.addItem("")
         self.comboBox_2.setObjectName(u"comboBox_2")
-        self.comboBox_2.setFont(font1)
+        self.comboBox_2.setFont(font)
         self.comboBox_2.setStyleSheet(u"QComboBox{\n"
 "	padding: 5px;\n"
 "	border-radius: 10px;\n"
@@ -421,13 +426,13 @@ class Ui_MainWindow(object):
 
         self.label_5 = QLabel(self.groupBox_3)
         self.label_5.setObjectName(u"label_5")
-        self.label_5.setFont(font1)
+        self.label_5.setFont(font)
 
         self.formLayout_2.setWidget(1, QFormLayout.LabelRole, self.label_5)
 
         self.lineEdit = QLineEdit(self.groupBox_3)
         self.lineEdit.setObjectName(u"lineEdit")
-        self.lineEdit.setFont(font1)
+        self.lineEdit.setFont(font)
         self.lineEdit.setStyleSheet(u"QLineEdit{\n"
 "	background: #F7EFE5;\n"
 "	border-radius: 10px;\n"
@@ -441,13 +446,13 @@ class Ui_MainWindow(object):
 
         self.label_6 = QLabel(self.groupBox_3)
         self.label_6.setObjectName(u"label_6")
-        self.label_6.setFont(font1)
+        self.label_6.setFont(font)
 
         self.formLayout_2.setWidget(2, QFormLayout.LabelRole, self.label_6)
 
         self.lineEdit_2 = QLineEdit(self.groupBox_3)
         self.lineEdit_2.setObjectName(u"lineEdit_2")
-        self.lineEdit_2.setFont(font1)
+        self.lineEdit_2.setFont(font)
         self.lineEdit_2.setStyleSheet(u"QLineEdit{\n"
 "	background: #F7EFE5;\n"
 "	border-radius: 10px;\n"
@@ -472,7 +477,7 @@ class Ui_MainWindow(object):
         sizePolicy4.setVerticalStretch(0)
         sizePolicy4.setHeightForWidth(self.groupBox_2.sizePolicy().hasHeightForWidth())
         self.groupBox_2.setSizePolicy(sizePolicy4)
-        self.groupBox_2.setFont(font1)
+        self.groupBox_2.setFont(font)
         self.groupBox_2.setFlat(True)
         self.verticalLayout_5 = QVBoxLayout(self.groupBox_2)
         self.verticalLayout_5.setObjectName(u"verticalLayout_5")
@@ -480,7 +485,7 @@ class Ui_MainWindow(object):
         self.chosen_subjects.setObjectName(u"chosen_subjects")
         self.chosen_subjects.setMinimumSize(QSize(300, 0))
         self.chosen_subjects.setMaximumSize(QSize(300, 16777215))
-        self.chosen_subjects.setFont(font1)
+        self.chosen_subjects.setFont(font)
         self.chosen_subjects.setStyleSheet(u"QListView{\n"
 "	background-color: #F7EFE5;\n"
 "	border-radius: 10px;\n"
@@ -499,92 +504,6 @@ class Ui_MainWindow(object):
         self.page_3.setObjectName(u"page_3")
         self.horizontalLayout_4 = QHBoxLayout(self.page_3)
         self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
-        self.frame_4 = QFrame(self.page_3)
-        self.frame_4.setObjectName(u"frame_4")
-        self.frame_4.setMaximumSize(QSize(450, 16777215))
-        self.frame_4.setFont(font1)
-        self.frame_4.setMouseTracking(True)
-        self.frame_4.setTabletTracking(True)
-        self.frame_4.setFrameShape(QFrame.NoFrame)
-        self.frame_4.setFrameShadow(QFrame.Plain)
-        self.verticalLayout = QVBoxLayout(self.frame_4)
-        self.verticalLayout.setObjectName(u"verticalLayout")
-        self.frame_2 = QFrame(self.frame_4)
-        self.frame_2.setObjectName(u"frame_2")
-        sizePolicy3.setHeightForWidth(self.frame_2.sizePolicy().hasHeightForWidth())
-        self.frame_2.setSizePolicy(sizePolicy3)
-        self.frame_2.setFont(font1)
-        self.frame_2.setFrameShape(QFrame.StyledPanel)
-        self.frame_2.setFrameShadow(QFrame.Raised)
-        self.formLayout_4 = QFormLayout(self.frame_2)
-        self.formLayout_4.setObjectName(u"formLayout_4")
-        self.label_3 = QLabel(self.frame_2)
-        self.label_3.setObjectName(u"label_3")
-        self.label_3.setFont(font1)
-
-        self.formLayout_4.setWidget(0, QFormLayout.LabelRole, self.label_3)
-
-        self.dateEdit = QDateEdit(self.frame_2)
-        self.dateEdit.setObjectName(u"dateEdit")
-        self.dateEdit.setFont(font1)
-        self.dateEdit.setStyleSheet(u"QDateEdit{\n"
-"	padding: 5px;\n"
-"	border-radius: 10px;\n"
-"	background: #F7EFE5;\n"
-"	border: 1px solid black;\n"
-"}\n"
-"\n"
-"QDateEdit::drop-down{\n"
-"	subcontrol-origin: border;\n"
-"    subcontrol-position: right;\n"
-"	width: 20px;\n"
-"	border-top-right-radius: 10px;\n"
-"	border-top-left-radius: 10px;\n"
-"}\n"
-"\n"
-"QDateEdit::down-arrow{\n"
-"	image: url(\"C:/Users/quang_mkkjeym/PycharmProjects/\\Timetable_Sorting/icons/down-arrow.png\");\n"
-"}")
-        self.dateEdit.setReadOnly(False)
-        self.dateEdit.setButtonSymbols(QAbstractSpinBox.UpDownArrows)
-        self.dateEdit.setAccelerated(False)
-        self.dateEdit.setProperty("showGroupSeparator", True)
-        self.dateEdit.setCalendarPopup(True)
-
-        self.formLayout_4.setWidget(0, QFormLayout.FieldRole, self.dateEdit)
-
-
-        self.verticalLayout.addWidget(self.frame_2)
-
-
-        self.horizontalLayout_4.addWidget(self.frame_4)
-
-        self.groupBox_9 = QGroupBox(self.page_3)
-        self.groupBox_9.setObjectName(u"groupBox_9")
-        sizePolicy4.setHeightForWidth(self.groupBox_9.sizePolicy().hasHeightForWidth())
-        self.groupBox_9.setSizePolicy(sizePolicy4)
-        self.groupBox_9.setFont(font1)
-        self.groupBox_9.setFlat(True)
-        self.verticalLayout_18 = QVBoxLayout(self.groupBox_9)
-        self.verticalLayout_18.setObjectName(u"verticalLayout_18")
-        self.chosen_subjects_4 = QListView(self.groupBox_9)
-        self.chosen_subjects_4.setObjectName(u"chosen_subjects_4")
-        self.chosen_subjects_4.setMinimumSize(QSize(300, 0))
-        self.chosen_subjects_4.setMaximumSize(QSize(300, 16777215))
-        self.chosen_subjects_4.setFont(font1)
-        self.chosen_subjects_4.setStyleSheet(u"QListView{\n"
-"	background-color: #F7EFE5;\n"
-"	border-radius: 10px;\n"
-"	border: 1px solid black;\n"
-"}")
-        self.chosen_subjects_4.setFrameShape(QFrame.NoFrame)
-        self.chosen_subjects_4.setFrameShadow(QFrame.Plain)
-
-        self.verticalLayout_18.addWidget(self.chosen_subjects_4)
-
-
-        self.horizontalLayout_4.addWidget(self.groupBox_9)
-
         self.stackedWidget.addWidget(self.page_3)
         self.page_4 = QWidget()
         self.page_4.setObjectName(u"page_4")
@@ -610,7 +529,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_12.setObjectName(u"verticalLayout_12")
         self.label_8 = QLabel(self.frame_9)
         self.label_8.setObjectName(u"label_8")
-        self.label_8.setFont(font1)
+        self.label_8.setFont(font)
         self.label_8.setWordWrap(True)
 
         self.verticalLayout_12.addWidget(self.label_8)
@@ -622,7 +541,7 @@ class Ui_MainWindow(object):
         sizePolicy5.setVerticalStretch(0)
         sizePolicy5.setHeightForWidth(self.pushButton_7.sizePolicy().hasHeightForWidth())
         self.pushButton_7.setSizePolicy(sizePolicy5)
-        self.pushButton_7.setFont(font1)
+        self.pushButton_7.setFont(font)
         self.pushButton_7.setStyleSheet(u"QPushButton {\n"
 "	border-radius: 10px;\n"
 "	padding: 5px;\n"
@@ -643,19 +562,19 @@ class Ui_MainWindow(object):
         self.groupBox_5.setObjectName(u"groupBox_5")
         sizePolicy3.setHeightForWidth(self.groupBox_5.sizePolicy().hasHeightForWidth())
         self.groupBox_5.setSizePolicy(sizePolicy3)
-        self.groupBox_5.setFont(font1)
+        self.groupBox_5.setFont(font)
         self.groupBox_5.setFlat(True)
         self.verticalLayout_11 = QVBoxLayout(self.groupBox_5)
         self.verticalLayout_11.setObjectName(u"verticalLayout_11")
         self.radioButton_2 = QRadioButton(self.groupBox_5)
         self.radioButton_2.setObjectName(u"radioButton_2")
-        self.radioButton_2.setFont(font1)
+        self.radioButton_2.setFont(font)
 
         self.verticalLayout_11.addWidget(self.radioButton_2)
 
         self.radioButton = QRadioButton(self.groupBox_5)
         self.radioButton.setObjectName(u"radioButton")
-        self.radioButton.setFont(font1)
+        self.radioButton.setFont(font)
 
         self.verticalLayout_11.addWidget(self.radioButton)
 
@@ -663,7 +582,7 @@ class Ui_MainWindow(object):
         self.pushButton_2.setObjectName(u"pushButton_2")
         sizePolicy5.setHeightForWidth(self.pushButton_2.sizePolicy().hasHeightForWidth())
         self.pushButton_2.setSizePolicy(sizePolicy5)
-        self.pushButton_2.setFont(font1)
+        self.pushButton_2.setFont(font)
         self.pushButton_2.setStyleSheet(u"QPushButton {\n"
 "	border-radius: 10px;\n"
 "	padding: 5px;\n"
@@ -677,7 +596,7 @@ class Ui_MainWindow(object):
         self.pushButton_6.setObjectName(u"pushButton_6")
         sizePolicy5.setHeightForWidth(self.pushButton_6.sizePolicy().hasHeightForWidth())
         self.pushButton_6.setSizePolicy(sizePolicy5)
-        self.pushButton_6.setFont(font1)
+        self.pushButton_6.setFont(font)
         self.pushButton_6.setStyleSheet(u"QPushButton {\n"
 "	border-radius: 10px;\n"
 "	padding: 5px;\n"
@@ -697,13 +616,60 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_9.addWidget(self.stackedWidget)
 
+        self.frame_2 = QFrame(self.centralwidget)
+        self.frame_2.setObjectName(u"frame_2")
+        sizePolicy3.setHeightForWidth(self.frame_2.sizePolicy().hasHeightForWidth())
+        self.frame_2.setSizePolicy(sizePolicy3)
+        self.frame_2.setFont(font)
+        self.frame_2.setFrameShape(QFrame.StyledPanel)
+        self.frame_2.setFrameShadow(QFrame.Raised)
+        self.formLayout_4 = QFormLayout(self.frame_2)
+        self.formLayout_4.setObjectName(u"formLayout_4")
+        self.label_3 = QLabel(self.frame_2)
+        self.label_3.setObjectName(u"label_3")
+        self.label_3.setFont(font)
+
+        self.formLayout_4.setWidget(2, QFormLayout.LabelRole, self.label_3)
+
+        self.dateEdit = QDateEdit(self.frame_2)
+        self.dateEdit.setObjectName(u"dateEdit")
+        self.dateEdit.setFont(font)
+        self.dateEdit.setStyleSheet(u"QDateEdit{\n"
+"	padding: 5px;\n"
+"	border-radius: 10px;\n"
+"	background: #F7EFE5;\n"
+"	border: 1px solid black;\n"
+"}\n"
+"\n"
+"QDateEdit::drop-down{\n"
+"	subcontrol-origin: border;\n"
+"    subcontrol-position: right;\n"
+"	width: 20px;\n"
+"	border-top-right-radius: 10px;\n"
+"	border-top-left-radius: 10px;\n"
+"}\n"
+"\n"
+"QDateEdit::down-arrow{\n"
+"	image: url(\"C:/Users/quang_mkkjeym/PycharmProjects/\\Timetable_Sorting/icons/down-arrow.png\");\n"
+"}")
+        self.dateEdit.setReadOnly(False)
+        self.dateEdit.setButtonSymbols(QAbstractSpinBox.UpDownArrows)
+        self.dateEdit.setAccelerated(False)
+        self.dateEdit.setProperty("showGroupSeparator", True)
+        self.dateEdit.setCalendarPopup(True)
+
+        self.formLayout_4.setWidget(2, QFormLayout.FieldRole, self.dateEdit)
+
+
+        self.verticalLayout_9.addWidget(self.frame_2)
+
         self.verticalSpacer_2 = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Minimum)
 
         self.verticalLayout_9.addItem(self.verticalSpacer_2)
 
         self.frame_7 = QFrame(self.centralwidget)
         self.frame_7.setObjectName(u"frame_7")
-        self.frame_7.setFont(font1)
+        self.frame_7.setFont(font)
         self.frame_7.setStyleSheet(u"QPushButton {\n"
 "	border-radius: 10px;\n"
 "	padding: 5px;\n"
@@ -722,7 +688,7 @@ class Ui_MainWindow(object):
         self.pushButton_5.setObjectName(u"pushButton_5")
         sizePolicy.setHeightForWidth(self.pushButton_5.sizePolicy().hasHeightForWidth())
         self.pushButton_5.setSizePolicy(sizePolicy)
-        self.pushButton_5.setFont(font1)
+        self.pushButton_5.setFont(font)
 
         self.horizontalLayout_2.addWidget(self.pushButton_5)
 
@@ -734,7 +700,7 @@ class Ui_MainWindow(object):
         self.pushButton_4.setObjectName(u"pushButton_4")
         sizePolicy.setHeightForWidth(self.pushButton_4.sizePolicy().hasHeightForWidth())
         self.pushButton_4.setSizePolicy(sizePolicy)
-        self.pushButton_4.setFont(font1)
+        self.pushButton_4.setFont(font)
         self.pushButton_4.setStyleSheet(u"QPushButton {\n"
 "	border-radius: 10px;\n"
 "	padding: 5px;\n"
@@ -754,15 +720,16 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 1053, 22))
+        self.menubar.setGeometry(QRect(0, 0, 1018, 22))
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QStatusBar(MainWindow)
         self.statusbar.setObjectName(u"statusbar")
         MainWindow.setStatusBar(self.statusbar)
 
         self.retranslateUi(MainWindow)
+        self.pushButton_4.clicked.connect(self.stackedWidget.hide)
 
-        self.stackedWidget.setCurrentIndex(0)
+        self.stackedWidget.setCurrentIndex(1)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -770,7 +737,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
-        self.label_7.setText(QCoreApplication.translate("MainWindow", u"[Step]", None))
+        self.progressBar.setFormat(QCoreApplication.translate("MainWindow", u"B\u01b0\u1edbc %v/3", None))
         self.label.setText(QCoreApplication.translate("MainWindow", u"Ch\u1ecdn file Excel th\u1eddi kho\u00e1 bi\u1ec3u", None))
         self.pushButton.setText(QCoreApplication.translate("MainWindow", u"Ch\u1ecdn file...", None))
         self.groupBox.setTitle(QCoreApplication.translate("MainWindow", u"Danh s\u00e1ch l\u1edbp h\u1ecdc", None))
@@ -801,10 +768,10 @@ class Ui_MainWindow(object):
         ___qtablewidgetitem11.setText(QCoreApplication.translate("MainWindow", u"Ph\u00f2ng h\u1ecdc", None));
         ___qtablewidgetitem12 = self.tableWidget_2.horizontalHeaderItem(5)
         ___qtablewidgetitem12.setText(QCoreApplication.translate("MainWindow", u"Lo\u1ea1i l\u1edbp", None));
-        self.label_2.setText(QCoreApplication.translate("MainWindow", u"Ch\u1ecdn h\u1ecdc ph\u1ea7n b\u1ea1n mu\u1ed1n h\u1ecdc", None))
+        self.label_2.setText(QCoreApplication.translate("MainWindow", u"Ch\u1ecdn h\u1ecdc ph\u1ea7n b\u1ea1n mu\u1ed1n \u0111\u0103ng k\u00fd", None))
         self.pushButton_3.setText(QCoreApplication.translate("MainWindow", u"Ch\u1ecdn", None))
         self.lineEdit_3.setPlaceholderText(QCoreApplication.translate("MainWindow", u"G\u00f5 m\u00e3 h\u1ecdc ph\u1ea7n b\u1ea1n mu\u1ed1n h\u1ecdc v\u00e0o \u0111\u00e2y", None))
-        self.groupBox_3.setTitle(QCoreApplication.translate("MainWindow", u"Gi\u1edbi h\u1ea1n t\u00edn ch\u1ec9", None))
+        self.groupBox_3.setTitle(QCoreApplication.translate("MainWindow", u"Gi\u1edbi h\u1ea1n t\u00edn ch\u1ec9 \u0111\u0103ng k\u00fd t\u1ed1i \u0111a", None))
         self.label_4.setText(QCoreApplication.translate("MainWindow", u"Ch\u01b0\u01a1ng tr\u00ecnh h\u1ecdc", None))
         self.comboBox_2.setItemText(0, QCoreApplication.translate("MainWindow", u"(none)", None))
         self.comboBox_2.setItemText(1, QCoreApplication.translate("MainWindow", u"Ch\u01b0\u01a1ng tr\u00ecnh chu\u1ea9n", None))
@@ -814,24 +781,15 @@ class Ui_MainWindow(object):
         self.label_5.setText(QCoreApplication.translate("MainWindow", u"S\u1ed1 t\u00edn ch\u1ec9 t\u1ed1i thi\u1ec3u", None))
         self.label_6.setText(QCoreApplication.translate("MainWindow", u"S\u1ed1 t\u00edn ch\u1ec9 t\u1ed1i \u0111a", None))
         self.groupBox_2.setTitle(QCoreApplication.translate("MainWindow", u"Danh s\u00e1ch c\u00e1c h\u1ecdc ph\u1ea7n \u0111\u00e3 ch\u1ecdn", None))
-        self.label_3.setText(QCoreApplication.translate("MainWindow", u"Ch\u1ecdn ng\u00e0y b\u1eaft \u0111\u1ea7u h\u1ecdc k\u1ef3", None))
-        self.groupBox_9.setTitle(QCoreApplication.translate("MainWindow", u"Danh s\u00e1ch c\u00e1c h\u1ecdc ph\u1ea7n \u0111\u00e3 ch\u1ecdn", None))
         self.label_8.setText(QCoreApplication.translate("MainWindow", u"N\u1ebfu c\u1ea3m th\u1ea5y l\u1ecbch h\u1ecdc v\u1eeba r\u1ed3i \u01b0ng \u00fd, b\u1ea1n c\u00f3 th\u1ec3 s\u1eed d\u1ee5ng tu\u1ef3 ch\u1ecdn xu\u1ea5t file .ics (\u0111\u1ecbnh d\u1ea1ng iCalendar) \u0111\u1ec3 s\u1eed d\u1ee5ng trong c\u00e1c \u1ee9ng d\u1ee5ng l\u1ecbch kh\u00e1c (Google Calendar hay Outlook, v.v)", None))
-        self.pushButton_7.setText(QCoreApplication.translate("MainWindow", u"\u0110i\u1ec1u ch\u1ec9nh l\u1ecbch h\u1ecdc th\u1ee7 c\u00f4ng...", None))
+        self.pushButton_7.setText(QCoreApplication.translate("MainWindow", u"\u0110i\u1ec1u ch\u1ec9nh l\u1ecbch h\u1ecdc th\u1ee7 c\u00f4ng (Coming soon)...", None))
         self.groupBox_5.setTitle(QCoreApplication.translate("MainWindow", u"B\u1ea1n mu\u1ed1n nh\u1eadn th\u00f4ng b\u00e1o l\u1ecbch h\u1ecdc nh\u01b0 th\u1ebf n\u00e0o?", None))
-        self.radioButton_2.setText(QCoreApplication.translate("MainWindow", u"Nh\u1eadn th\u00f4ng b\u00e1o -cho t\u1eebng ti\u1ebft h\u1ecdc", None))
+        self.radioButton_2.setText(QCoreApplication.translate("MainWindow", u"Nh\u1eadn th\u00f4ng b\u00e1o cho t\u1eebng ti\u1ebft h\u1ecdc", None))
         self.radioButton.setText(QCoreApplication.translate("MainWindow", u"Nh\u1eadn th\u00f4ng b\u00e1o t\u1ed5ng h\u1ee3p", None))
         self.pushButton_2.setText(QCoreApplication.translate("MainWindow", u"Xu\u1ea5t file .ics...", None))
         self.pushButton_6.setText(QCoreApplication.translate("MainWindow", u"H\u01b0\u1edbng d\u1eabn s\u1eed d\u1ee5ng file .ics cho c\u00e1c \u1ee9ng d\u1ee5ng l\u1ecbch...", None))
+        self.label_3.setText(QCoreApplication.translate("MainWindow", u"Ch\u1ecdn ng\u00e0y b\u1eaft \u0111\u1ea7u h\u1ecdc k\u1ef3", None))
         self.pushButton_5.setText(QCoreApplication.translate("MainWindow", u"Tr\u1edf l\u1ea1i b\u01b0\u1edbc tr\u01b0\u1edbc", None))
         self.pushButton_4.setText(QCoreApplication.translate("MainWindow", u"\u0110i \u0111\u1ebfn b\u01b0\u1edbc ti\u1ebfp theo", None))
     # retranslateUi
 
-if __name__ == "__main__":
-        import sys
-        app = QApplication(sys.argv)
-        MainWindow = QMainWindow()
-        ui = Ui_MainWindow()
-        ui.setupUi(MainWindow)
-        MainWindow.show()
-        sys.exit(app.exec())
