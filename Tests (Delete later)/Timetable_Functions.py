@@ -61,6 +61,9 @@ def data_cleaning(filename: str):
 
 
 def subject_filtering(dataframe):
+  """
+  returns a dictionary of the selected subjects as keys and values as each subject's classes that are open"
+  """
     # Output will only have "BT" or "LT+BT" labeled classes
     # TODO: Create new filters for classes labeled as "TN" or "LT"
     # Enter "*" to stop
@@ -78,3 +81,35 @@ def subject_filtering(dataframe):
         filtered_classes_ID = dfx["Mã lớp"].to_numpy().tolist()
         maHPs[maHP] = filtered_classes_ID
   return maHPs
+
+
+
+def check(dataframe, class_id, calendar):
+    flag = 0
+    row = dataframe["Mã lớp"] == str(class_id)
+    date = int(dataframe.loc[row, "Thứ"])
+    start = int(dataframe.loc[row, "Bắt đầu"])
+    end = int(dataframe.loc[row, "Kết thúc"])
+    for i in range(start, end+1):
+        if calendar[date][i] == 0:
+            calendar[date][i] = 1
+            flag += 1
+    if flag < end-start+1:
+        return False
+    return True
+
+
+def Try(k, templist):
+    global initial_solution
+    initial_solution = []
+    if k == len(maHPs):
+        initial_solution = templist.copy()
+        return
+    key = list(maHPs.keys())[k]
+    for maHP_loop in maHPs[key]:
+        if check(maHP_loop, calendar):
+            templist.append(maHP_loop)
+            Try(k+1, templist)
+            if initial_solution:
+                return initial_solution
+            templist.pop()
