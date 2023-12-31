@@ -2,9 +2,13 @@ import numpy as np
 import pandas as pd
 
 
-def grouping_location(_room):
+def grouping_location(_room: str):
     """
     Grouping study locations into bigger areas
+    Arguments:
+        _room: a string. e.g: 'D3-301'
+    Returns:
+         The code for the area where the room is located
     """
     building = _room[:2] if _room[2] == "-" else _room[:3]
     if building in ["D3", "D5"]:
@@ -26,8 +30,12 @@ def grouping_location(_room):
 
 def data_cleaning(filename: str):
     """
-    Input Excel files and return unfiltered dataframe and filtered dataframe
-    correct syntax: df, df1 = data_cleaning(**filename**)
+    Clean data from a dataframe
+    Arguments:
+        filename: a string contains the name of an Excel file ('.xlsx' tail)
+    Returns:
+        Unfiltered_data: full data of the table, without no cuts.
+        Filtered_data: A shorter version of Unfiltered_data, contains necessary information for the algorithm to work.
     """
     cols = ["Kỳ", "Trường_Viện_Khoa", "Mã lớp", "Mã lớp kèm", "Mã HP", "Tên HP",
             "Tên HP Tiếng Anh", "Khối lượng", "Ghi chú", "Buổi số", "Thứ", "Thời gian",
@@ -62,11 +70,12 @@ def data_cleaning(filename: str):
 
 def subject_filtering(dataframe):
   """
-  returns a dictionary of the selected subjects as keys and values as each subject's classes that are open"
+  Filter subjects into a dictionary
+  Arguments:
+      dataframe: a dataframe. To be precise, please use the Filtered_data.
+  Returns:
+       A dictionary contains the subject IDs as keys and their corresponding classes IDs as values
   """
-    # Output will only have "BT" or "LT+BT" labeled classes
-    # TODO: Create new filters for classes labeled as "TN" or "LT"
-    # Enter "*" to stop
   maHPs = {}
   maHP = ""
   while maHP != "*":
@@ -81,7 +90,6 @@ def subject_filtering(dataframe):
         filtered_classes_ID = dfx["Mã lớp"].to_numpy().tolist()
         maHPs[maHP] = filtered_classes_ID
   return maHPs
-
 
 
 def check(dataframe, class_id, calendar):
@@ -99,17 +107,16 @@ def check(dataframe, class_id, calendar):
     return True
 
 
-def Try(k, templist):
-    global initial_solution
+def Try(dataframe, maHPs, calendar, k, templist):
     initial_solution = []
     if k == len(maHPs):
         initial_solution = templist.copy()
         return
     key = list(maHPs.keys())[k]
-    for maHP_loop in maHPs[key]:
-        if check(maHP_loop, calendar):
-            templist.append(maHP_loop)
-            Try(k+1, templist)
+    for maHP_items in maHPs[key]:
+        if check(dataframe, maHP_items, calendar):
+            templist.append(maHP_items)
+            Try(dataframe, maHPs, calendar, k+1, templist)
             if initial_solution:
                 return initial_solution
             templist.pop()
