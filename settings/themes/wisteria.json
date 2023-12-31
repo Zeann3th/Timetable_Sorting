@@ -1,0 +1,18 @@
+{
+    "bg-color": "#FFFBF5",
+    "box-color": "#F7EFE5",
+    "non-primary-button-color": "#C3ACD0",
+    "non-primary-button-hover": "#A994B5",
+    "primary-button-color": "#7743DB",
+    "primary-button-hover": "#6438ba",
+    "text-color-dark-bg": "#ffffff",
+    "text-color-light-bg": "#000000",
+    "text-color-primary-button": "text-color-dark-bg",
+    "text-color-non-primary-button": "text-color-light-bg",
+    "border-color": "#000000",
+    "border-width": "1px",
+    "border-style": "solid",
+    "border-radius": "10px",
+    "font-size": 13,
+    "title-font-size": 16
+}
