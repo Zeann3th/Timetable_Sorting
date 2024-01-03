@@ -1,3 +1,5 @@
 \venv
 \.idea
 *.pyc
+root_directory.txt
+ui_package/root_directory.txt

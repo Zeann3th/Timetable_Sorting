@@ -1,6 +1,8 @@
 {
     "bg-color": "#FFFBF5",
     "box-color": "#F7EFE5",
+    "alternate-box-color": "#e3dacf",
+    "box-selection-color": "#d1c9be",
     "non-primary-button-color": "#C3ACD0",
     "non-primary-button-hover": "#A994B5",
     "primary-button-color": "#7743DB",

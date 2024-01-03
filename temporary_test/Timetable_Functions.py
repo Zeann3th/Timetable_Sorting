@@ -69,27 +69,27 @@ def data_cleaning(filename: str):
 
 
 def subject_filtering(dataframe):
-  """
-  Filter subjects into a dictionary
-  Arguments:
+    """
+    Filter subjects into a dictionary
+    Arguments:
       dataframe: a dataframe. To be precise, please use the Filtered_data.
-  Returns:
+    Returns:
        A dictionary contains the subject IDs as keys and their corresponding classes IDs as values
-  """
-  maHPs = {}
-  maHP = ""
-  while maHP != "*":
-    maHP = input()
-    if maHP not in dataframe["Mã HP"].to_numpy().tolist():
-        if maHP != "*":
-            print(f"Không tồn tại mã học phần {maHP}")
-        continue
-    if maHP not in maHPs:
-        dfx = dataframe[dataframe["Mã HP"] == maHP]
-        dfx = dfx[dfx["Loại lớp"].isin(["BT", "LT+BT"])]
-        filtered_classes_ID = dfx["Mã lớp"].to_numpy().tolist()
-        maHPs[maHP] = filtered_classes_ID
-  return maHPs
+    """
+    maHPs = {}
+    maHP = ""
+    while maHP != "*":
+        maHP = input()
+        if maHP not in dataframe["Mã HP"].to_numpy().tolist():
+            if maHP != "*":
+                print(f"Không tồn tại mã học phần {maHP}")
+            continue
+        if maHP not in maHPs:
+            dfx = dataframe[dataframe["Mã HP"] == maHP]
+            dfx = dfx[dfx["Loại lớp"].isin(["BT", "LT+BT"])]
+            filtered_classes_ID = dfx["Mã lớp"].to_numpy().tolist()
+            maHPs[maHP] = filtered_classes_ID
+    return maHPs
 
 
 def check(dataframe, class_id, calendar):
@@ -98,11 +98,11 @@ def check(dataframe, class_id, calendar):
     date = int(dataframe.loc[row, "Thứ"])
     start = int(dataframe.loc[row, "Bắt đầu"])
     end = int(dataframe.loc[row, "Kết thúc"])
-    for i in range(start, end+1):
+    for i in range(start, end + 1):
         if calendar[date][i] == 0:
             calendar[date][i] = 1
             flag += 1
-    if flag < end-start+1:
+    if flag < end - start + 1:
         return False
     return True
 
@@ -116,7 +116,7 @@ def Try(dataframe, maHPs, calendar, k, templist):
     for maHP_items in maHPs[key]:
         if check(dataframe, maHP_items, calendar):
             templist.append(maHP_items)
-            Try(dataframe, maHPs, calendar, k+1, templist)
+            Try(dataframe, maHPs, calendar, k + 1, templist)
             if initial_solution:
                 return initial_solution
             templist.pop()
