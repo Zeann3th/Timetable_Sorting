@@ -1,6 +1,15 @@
-import Timetable_Functions
-from tkinter import askopenfilename
+import Timetable_Functions as Tf
+import warnings
+from tkinter.filedialog import askopenfilename
+warnings.filterwarnings("ignore")
+
 
 filename = askopenfilename()
+unfiltered_data, filtered_data = Tf.Data_cleaning(filename)
+# Function works!!!, uncomment to test it
+# print(unfiltered_data)
+# print(filtered_data)
 
-data
+maHPs = Tf.Subject_filtering(filtered_data)
+# Function works!!!, uncomment to test it
+# print(maHPs)
