@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 
-def grouping_location(_room: str):
+def Grouping_location(_room: str):
     """
     Grouping study locations into bigger areas
     Arguments:
@@ -28,7 +28,7 @@ def grouping_location(_room: str):
     return 7
 
 
-def data_cleaning(filename: str):
+def Data_cleaning(filename: str):
     """
     Clean data from a dataframe
     Arguments:
@@ -62,13 +62,13 @@ def data_cleaning(filename: str):
     df1["Phòng"] = df1["Phòng"].astype(str)
     group_num = []
     for room in (df1["Phòng"].to_numpy().tolist()):
-        group_num.append(grouping_location(room))
+        group_num.append(Grouping_location(room))
     df1.insert(loc=11, column="Khu", value=group_num)
     del df1["Phòng"]
     return df, df1  # df, df1 = data_cleaning("TKB20231-FULL-1809.xlsx")
 
 
-def subject_filtering(dataframe):
+def Subject_filtering(dataframe):
     """
     Filter subjects into a dictionary
     Arguments:
@@ -92,7 +92,7 @@ def subject_filtering(dataframe):
     return maHPs
 
 
-def check(dataframe, class_id, calendar):
+def Check(dataframe, class_id, calendar):
     flag = 0
     row = dataframe["Mã lớp"] == str(class_id)
     date = int(dataframe.loc[row, "Thứ"])
@@ -114,7 +114,7 @@ def Try(dataframe, maHPs, calendar, k, templist):
         return
     key = list(maHPs.keys())[k]
     for maHP_items in maHPs[key]:
-        if check(dataframe, maHP_items, calendar):
+        if Check(dataframe, maHP_items, calendar):
             templist.append(maHP_items)
             Try(dataframe, maHPs, calendar, k + 1, templist)
             if initial_solution:
