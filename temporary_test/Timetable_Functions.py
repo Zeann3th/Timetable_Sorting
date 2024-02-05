@@ -1,4 +1,6 @@
 import pandas as pd
+import numpy as np
+import copy
 
 
 def Grouping_location(_room: str):
@@ -75,47 +77,86 @@ def Subject_filtering(dataframe):
     Returns:
        A dictionary contains the subject IDs as keys and their corresponding classes IDs as values
     """
-    maHPs = {}
-    maHP = ""
-    while maHP != "*":
-        maHP = input("Nhập mã học phần của bạn: ")
-        if maHP not in dataframe["Mã HP"].to_numpy().tolist():
-            if maHP != "*":
-                print(f"Không tồn tại mã học phần {maHP}")
+    ma_hps = {}
+    ma_hp = ""
+    while ma_hp != "*":
+        ma_hp = input("Nhập mã học phần của bạn: ")
+        if ma_hp not in dataframe["Mã HP"].to_numpy().tolist():
+            if ma_hp != "*":
+                print(f"Không tồn tại mã học phần {ma_hp}")
             continue
-        if maHP not in maHPs:
-            dfx = dataframe[dataframe["Mã HP"] == maHP]
+        if ma_hp not in ma_hps:
+            dfx = dataframe[dataframe["Mã HP"] == ma_hp]
             dfx = dfx[dfx["Loại lớp"].isin(["BT", "LT+BT"])]
-            filtered_classes_ID = dfx["Mã lớp"].to_numpy().tolist()
-            maHPs[maHP] = filtered_classes_ID
-    return maHPs
+            filtered_classes_id = dfx["Mã lớp"].to_numpy().tolist()
+            ma_hps[ma_hp] = filtered_classes_id
+    return ma_hps
 
 
-def Check(dataframe, class_id, calendar):
-    flag = 0
-    row = dataframe["Mã lớp"] == str(class_id)
-    date = int(dataframe.loc[row, "Thứ"])
-    start = int(dataframe.loc[row, "Bắt đầu"])
-    end = int(dataframe.loc[row, "Kết thúc"])
-    for i in range(start, end + 1):
-        if calendar[date][i] == 0:
-            calendar[date][i] = 1
-            flag += 1
-    if flag < end - start + 1:
-        return False
+# def Try(dataframe, maHPs, calendar, k, templist):
+#     initial_solution = []
+#     if k == len(maHPs):
+#         initial_solution = templist.copy()
+#         return
+#     key = list(maHPs.keys())[k]
+#     for maHP_items in maHPs[key]:
+#         if Check(dataframe, maHP_items, calendar):
+#             templist.append(maHP_items)
+#             Try(dataframe, maHPs, calendar, k + 1, templist)
+#             if initial_solution:
+#                 return initial_solution
+#             templist.pop()
+def Check(dataframe, _calendar, class_id):
+    """
+    Check if a class is suitable for the timetable
+    Arguments:
+        dataframe: filtered_data
+        _calendar: list that have weekdays from 2 to 8 and time from 0645 to 1800 (just use the default)
+        class_id: ID of classes. e.g: `151128`
+    Returns:
+        True if it is safe to fill in that class
+        False if it is not
+    """
+    row = dataframe[dataframe["Mã lớp"] == class_id]  # Tìm hàng có "Mã lớp" == mã lớp đang chọn
+    date = int(row["Thứ"].values[0])  # Tìm thứ
+    start = int(row["Bắt đầu"].values[0])  # Tìm gờ bắt đầu
+    end = int(row["Kết thúc"].values[0])  # Tìm giờ kết thúc
+    for i in range(start, end + 1):  # Nếu lướt qua mà có thấy có môn học ở thoài gian này thì trả về False
+        if _calendar[date][i] == 1:
+            return False
+    for i in range(start, end+1):  # Hơi cồng kềnh nma ko muốn điền vào vòng lặp trước đấy =))
+        _calendar[date][i] = 1
     return True
 
 
-def Try(dataframe, maHPs, calendar, k, templist):
-    initial_solution = []
-    if k == len(maHPs):
-        initial_solution = templist.copy()
-        return
-    key = list(maHPs.keys())[k]
-    for maHP_items in maHPs[key]:
-        if Check(dataframe, maHP_items, calendar):
-            templist.append(maHP_items)
-            Try(dataframe, maHPs, calendar, k + 1, templist)
-            if initial_solution:
-                return initial_solution
-            templist.pop()
+def Try(k: int, dataframe, ma_hps: dict, _calendar=np.zeros((9, 1801)), _calendar_state=[], _initial_solution=[]):
+    """
+    Finding the initial solution for the problem
+    Arguments:
+        k: int
+        dataframe: filtered_data
+        ma_hps: dictionary that have keys as subject's ID and values as subject's classes
+        _calendar: list that have weekdays from 2 to 8 and time from 0645 to 1800 (just use the default)
+        _calendar_state: empty list to store calendar
+        _initial_solution: empty list to store suitable classes
+    Returns:
+        Initial_solution: a list of suitable classes
+    """
+    key = list(ma_hps.keys())[k]  # Chọn mã học phần đã nhập (với k khác nhau thì là mã HP khác nhau)
+    for maHP_items in ma_hps[key]:  # Với mỗi mã lớp của mã học phần đó
+        if Check(dataframe, _calendar, maHP_items):
+            # Kiểm tra xem lịch ở thời điểm đó có trống hay ko, trống thì true và điền vào lịch, đầy thì false
+            _calendar_state.append(_calendar)  # Lưu lại lịch cũ để khi backtrack còn quay lại lịch cũ để tìm kqua mới
+            _initial_solution.append(maHP_items)  # Biến chứa các mã lớp hợp lệ, dùng để return
+            if k == len(list(ma_hps.keys()))-1:  # nếu k == số HP nhập thì ...
+                if not _initial_solution:  # nếu lời giải rỗng => ...
+                    print("There is no suitable timetable right now")
+                else:  # nếu lời giải ko rỗng => ... (Cần phải exit chỗ này)
+                    return _initial_solution
+            else:  # nếu k != số HP nhập, tìm mã lớp HP tiếp theo
+                result = Try(k + 1, dataframe, ma_hps, _calendar, _calendar_state, _initial_solution)
+                if result:
+                    return result
+                _initial_solution.pop()  # Nếu duyệt hết mà ko thấy mã lớp do kín lịch, backtrack và xóa mã lớp đã điền
+                _calendar_state.pop()  # Xóa lịch ko hợp lệ
+                _calendar = copy.deepcopy(_calendar_state[-1])  # copy trạng thái cũ của lịch
