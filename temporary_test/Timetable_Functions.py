@@ -78,7 +78,7 @@ def Subject_filtering(dataframe):
     maHPs = {}
     maHP = ""
     while maHP != "*":
-        maHP = input()
+        maHP = input("Nhập mã học phần của bạn: ")
         if maHP not in dataframe["Mã HP"].to_numpy().tolist():
             if maHP != "*":
                 print(f"Không tồn tại mã học phần {maHP}")
