@@ -22,6 +22,7 @@ def Try(k: int, dataframe, ma_hps: dict, _calendar=np.zeros((9, 1801)), _calenda
     Finding the initial solution for the problem
     Arguments:
         k: int
+        dataframe: filtered_data
         ma_hps: dictionary that have keys as subject's ID and values as subject's classes
         _calendar: list that have weekdays from 2 to 8 and time from 0645 to 1800 (just use the default)
         _calendar_state: empty list to store calendar
@@ -50,7 +51,7 @@ def Try(k: int, dataframe, ma_hps: dict, _calendar=np.zeros((9, 1801)), _calenda
 
 
 def Check(dataframe, _calendar, class_id):
-    """"
+    """
     Check if a class is suitable for the timetable
     Arguments:
         dataframe: filtered_data
@@ -60,14 +61,14 @@ def Check(dataframe, _calendar, class_id):
         True if it is safe to fill in that class
         False if it is not
     """
-    row = dataframe[dataframe["Mã lớp"] == class_id]
-    date = int(row["Thứ"].values[0])
-    start = int(row["Bắt đầu"].values[0])
-    end = int(row["Kết thúc"].values[0])
-    for i in range(start, end + 1):
+    row = dataframe[dataframe["Mã lớp"] == class_id]  # Tìm hàng có "Mã lớp" == mã lớp đang chọn
+    date = int(row["Thứ"].values[0])  # Tìm thứ
+    start = int(row["Bắt đầu"].values[0])  # Tìm gờ bắt đầu
+    end = int(row["Kết thúc"].values[0])  # Tìm giờ kết thúc
+    for i in range(start, end + 1):  # Nếu lướt qua mà có thấy có môn học ở thoài gian này thì trả về False
         if _calendar[date][i] == 1:
             return False
-    for i in range(start, end+1):
+    for i in range(start, end+1):  # Hơi cồng kềnh nma ko muốn điền vào vòng lặp trước đấy =))
         _calendar[date][i] = 1
     return True
 
