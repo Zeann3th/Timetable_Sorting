@@ -500,11 +500,6 @@ class Ui_MainWindow(object):
                 self.horizontalLayout_3.addWidget(self.groupBox_2)
 
                 self.stackedWidget.addWidget(self.page_2)
-                self.page_3 = QWidget()
-                self.page_3.setObjectName(u"page_3")
-                self.horizontalLayout_4 = QHBoxLayout(self.page_3)
-                self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
-                self.stackedWidget.addWidget(self.page_3)
                 self.page_4 = QWidget()
                 self.page_4.setObjectName(u"page_4")
                 self.horizontalLayout_5 = QHBoxLayout(self.page_4)
@@ -727,9 +722,8 @@ class Ui_MainWindow(object):
                 MainWindow.setStatusBar(self.statusbar)
 
                 self.retranslateUi(MainWindow)
-                self.pushButton_4.clicked.connect(self.stackedWidget.hide)
 
-                self.stackedWidget.setCurrentIndex(1)
+                self.stackedWidget.setCurrentIndex(2)
 
 
                 QMetaObject.connectSlotsByName(MainWindow)

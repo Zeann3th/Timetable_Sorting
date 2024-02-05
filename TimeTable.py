@@ -89,7 +89,7 @@ print("Hãy nhập vào mã học phần của môn học bạn định đăng k
 while maHP != "*":
     maHP = input()
     if maHP not in df1["Mã HP"].to_numpy().tolist():
-        if (maHP != "*"):
+        if maHP != "*":
             print(f"Không tồn tại mã học phần {maHP}")
         continue
     if maHP not in maHPs:
@@ -117,7 +117,7 @@ initial_solution = []
 # TODO Fix the `check` function so that if it backtracks, it reverts the `calendar` variable
 
 
-def check(class_id, _calendar):
+def Check(class_id, _calendar):
     flag = 0
     row = df1["Mã lớp"] == str(class_id)
     date = int(df1.loc[row, "Thứ"])
@@ -140,7 +140,7 @@ def Try(k, templist):
         return
     key = list(maHPs.keys())[k]
     for maHP_loop in maHPs[key]:
-        if check(maHP_loop, calendar):
+        if Check(maHP_loop, calendar):
             templist.append(maHP_loop)
             Try(k+1, templist)
             if initial_solution:
