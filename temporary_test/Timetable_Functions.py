@@ -104,15 +104,28 @@ def Check(dataframe, _calendar, class_id):
         True if it is safe to fill in that class
         False if it is not
     """
-    row = dataframe[dataframe["Mã lớp"] == class_id]  # Tìm hàng có "Mã lớp" == mã lớp đang chọn
+    row = dataframe[dataframe["Mã lớp"] == class_id]  # Tìm hàng có "Mã lớp" == mã lớp bài tập đang chọn
+    # week = int(row["Tuần"].values[0])  #TODO: Cần phải format tuần
     date = int(row["Thứ"].values[0])  # Tìm thứ
-    start = int(row["Bắt đầu"].values[0])  # Tìm gờ bắt đầu
+    start = int(row["Bắt đầu"].values[0])  # Tìm giờ bắt đầu
     end = int(row["Kết thúc"].values[0])  # Tìm giờ kết thúc
-    for i in range(start, end + 1):  # Nếu lướt qua mà có thấy có môn học ở thoài gian này thì trả về False
+    for i in range(start, end + 1):  # Nếu lướt qua mà có thấy có môn học ở thời gian này thì trả về False
         if _calendar[date][i] == 1:
             return False
     for i in range(start, end+1):  # Hơi cồng kềnh nma ko muốn điền vào vòng lặp trước đấy =))
         _calendar[date][i] = 1
+    if int(row["Mã lớp kèm"].values[0]) != class_id:
+        # Nếu mã lớp kèm != mã lớp (tránh phải duyệt hết, tuy nhiên vẫn vướng mấy lớp có tuần chẵn, tuần lẻ. e.g: SSH1131)
+        row = dataframe[dataframe["Mã lớp"] == int(row["Mã lớp kèm"])]
+        # week = int(row["Tuần"].values[0])  #TODO: Cần phải format tuần
+        date = int(row["Thứ"].values[0])  # Tìm thứ
+        start = int(row["Bắt đầu"].values[0])  # Tìm giờ bắt đầu
+        end = int(row["Kết thúc"].values[0])  # Tìm giờ kết thúc
+        for i in range(start, end + 1):  # Nếu lướt qua mà có thấy có môn học ở thời gian này thì trả về False
+            if _calendar[date][i] == 1:
+                return False
+        for i in range(start, end + 1):  # Hơi cồng kềnh nma ko muốn điền vào vòng lặp trước đấy =))
+            _calendar[date][i] = 1
     return True
 
 
@@ -138,6 +151,7 @@ def Try(k: int, dataframe, ma_hps: dict, _calendar=np.zeros((9, 1801)), _calenda
             if k == len(list(ma_hps.keys()))-1:  # nếu k == số HP nhập thì ...
                 if not _initial_solution:  # nếu lời giải rỗng => ...
                     print("There is no suitable timetable right now")
+                    return []
                 else:  # nếu lời giải ko rỗng => ... (Cần phải exit chỗ này)
                     return _initial_solution
             else:  # nếu k != số HP nhập, tìm mã lớp HP tiếp theo
@@ -146,4 +160,4 @@ def Try(k: int, dataframe, ma_hps: dict, _calendar=np.zeros((9, 1801)), _calenda
                     return result
                 _initial_solution.pop()  # Nếu duyệt hết mà ko thấy mã lớp do kín lịch, backtrack và xóa mã lớp đã điền
                 _calendar_state.pop()  # Xóa lịch ko hợp lệ
-                _calendar = copy.deepcopy(_calendar_state[-1])  # copy trạng thái cũ của lịch
+                _calendar = _calendar_state[-1]
