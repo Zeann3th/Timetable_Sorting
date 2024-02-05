@@ -93,19 +93,6 @@ def Subject_filtering(dataframe):
     return ma_hps
 
 
-# def Try(dataframe, maHPs, calendar, k, templist):
-#     initial_solution = []
-#     if k == len(maHPs):
-#         initial_solution = templist.copy()
-#         return
-#     key = list(maHPs.keys())[k]
-#     for maHP_items in maHPs[key]:
-#         if Check(dataframe, maHP_items, calendar):
-#             templist.append(maHP_items)
-#             Try(dataframe, maHPs, calendar, k + 1, templist)
-#             if initial_solution:
-#                 return initial_solution
-#             templist.pop()
 def Check(dataframe, _calendar, class_id):
     """
     Check if a class is suitable for the timetable
