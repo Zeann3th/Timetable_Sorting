@@ -197,6 +197,7 @@ def fitness(_solution: list) -> int:
     return 0
 # TODO: Cần phải nghĩ ra tiêu chí để xét điểm
 
+
 def Selection_pair(population: list, fitness_func) -> list:
     """
     Choose 2 random solution from population.
@@ -214,6 +215,7 @@ def Selection_pair(population: list, fitness_func) -> list:
         k=2
     )
 # TODO: Cần phải hoàn thiện hàm Selection_pair()
+
 
 def Single_point_crossover(a: list, b: list) -> Tuple[list, list]:
     """
