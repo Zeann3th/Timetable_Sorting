@@ -2,15 +2,18 @@ import pandas as pd
 import numpy as np
 import copy
 from random import choices, randint
+from typing import Tuple
 
 
 def Grouping_location(_room: str) -> int:
     """
-    Grouping study locations into bigger areas
-    Arguments:
-        _room: a string. e.g: 'D3-301'
+    Grouping study locations into bigger areas.
+
+    Args:
+        _room (str): A Room in school. e.g: 'D3-301'.
+
     Returns:
-         The code for the area where the room is located
+         int: The code area where the room is located.
     """
     building = _room[:2] if _room[2] == "-" else _room[:3]
     if building in ["D3", "D5"]:
@@ -30,14 +33,15 @@ def Grouping_location(_room: str) -> int:
     return 7
 
 
-def Data_cleaning(filename: str):
+def Data_cleaning(filename: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
-    Clean data from a dataframe
-    Arguments:
-        filename: a string contains the name of an Excel file ('.xlsx' tail)
+    Filter, process data from a dataframe.
+
+    Args:
+        filename (str): A string contains the name of an Excel file ('.xlsx' tail).
+
     Returns:
-        Unfiltered_data: full data of the table, without no cuts.
-        Filtered_data: A shorter version of Unfiltered_data, contains necessary information for the algorithm to work.
+        (pd.DataFrame, pd.DataFrame): Unfiltered_data and Filtered_data
     """
     cols = ["Kỳ", "Trường_Viện_Khoa", "Mã lớp", "Mã lớp kèm", "Mã HP", "Tên HP",
             "Tên HP Tiếng Anh", "Khối lượng", "Ghi chú", "Buổi số", "Thứ", "Thời gian",
@@ -70,13 +74,15 @@ def Data_cleaning(filename: str):
     return df, df1  # df, df1 = data_cleaning("TKB20231-FULL-1809.xlsx")
 
 
-def Subject_filtering(dataframe) -> dict:
+def Subject_filtering(dataframe: pd.DataFrame) -> dict:
     """
-    Filter subjects into a dictionary
-    Arguments:
-      dataframe: a dataframe. To be precise, please use the Filtered_data.
+    Filter subjects into a dictionary.
+
+    Args:
+      dataframe (pd.DataFrame): Filtered_data.
+
     Returns:
-       A dictionary contains the subject IDs as keys and their corresponding classes IDs as values
+       dict: A dictionary contains the subject IDs as keys and their corresponding classes IDs as values.
     """
     ma_hps = {}
     ma_hp = ""
@@ -94,16 +100,17 @@ def Subject_filtering(dataframe) -> dict:
     return ma_hps
 
 
-def Check(dataframe, _calendar, class_id) -> bool:
+def Check(dataframe: pd.DataFrame, _calendar: np.ndarray, class_id: int) -> bool:
     """
-    Check if a class is suitable for the timetable
-    Arguments:
-        dataframe: filtered_data
-        _calendar: list that have weekdays from 2 to 8 and time from 0645 to 1800 (just use the default)
-        class_id: ID of classes. e.g: `151128`
+    Check if a class is suitable for the timetable.
+
+    Args:
+        dataframe (pd.DataFrame): Filtered_data.
+        _calendar (np.ndarray): Numpy array that have weekdays from 2 to 8 and time from 0645 to 1800.
+        class_id (int): ID of classes. e.g: `151128`.
+
     Returns:
-        True if it is safe to fill in that class
-        False if it is not
+        bool: True if it is safe to fill in that class, False if it is not.
     """
     row = dataframe[dataframe["Mã lớp"] == class_id]  # Tìm hàng có "Mã lớp" == mã lớp bài tập đang chọn
     # week = int(row["Tuần"].values[0])  #TODO: Cần phải format tuần
@@ -131,21 +138,23 @@ def Check(dataframe, _calendar, class_id) -> bool:
     return True
 
 
-def Generate_population(k: int, dataframe, ma_hps: dict, _calendar=np.zeros((9, 1801)), _calendar_state=[],
-                        _solution=[], _population=[], _population_num=10):
+def Generate_population(k: int, dataframe, ma_hps: dict, _calendar=np.zeros((9, 1801)), _calendar_state: list = [],
+                        _solution: list = [], _population: list = [], _population_num: int = 10) -> list:
     """
-    Finding the first generation for the problem
-    Arguments:
-        k: int
-        dataframe: filtered_data
-        ma_hps: dictionary that have keys as subject's ID and values as subject's classes
-        _calendar: list that have weekdays from 2 to 8 and time from 0645 to 1800 (just use the default)
-        _calendar_state: empty list to store calendar
-        _solution: empty list to store suitable classes
-        _population: empty list to store solutions
-        _population_num: number of solutions
+    Finding the first generation for the problem.
+
+    Args:
+        k (int): The index of subjects.
+        dataframe (pd.DataFrame): Filtered_data.
+        ma_hps (dict): Dictionary that have keys as subject's ID and values as subject's classes.
+        _calendar (np.ndarray): Numpy array that have weekdays from 2 to 8 and time from 0645 to 1800.
+        _calendar_state (list): Empty list to store calendars.
+        _solution (list): Empty list to store suitable classes.
+        _population (list): Empty list to store solutions.
+        _population_num (int): Number of solutions.
+
     Returns:
-        Initial_solution: a list of suitable classes
+        list: a list of solutions.
     """
     key = list(ma_hps.keys())[k]  # Chọn mã học phần đã nhập (với k khác nhau thì là mã HP khác nhau)
     for maHP_items in ma_hps[key]:  # Với mỗi mã lớp của mã học phần đó
@@ -175,34 +184,67 @@ def Generate_population(k: int, dataframe, ma_hps: dict, _calendar=np.zeros((9, 
     return _population
 
 
-def fitness(_genome) -> int:
-    # Kiểm tra độ tương thích, tối ưu của lời giải
-    # Kiểm tra giờ giấc, phòng học tùy theo người đky
-    # TODO: Nghĩ ra các tiêu chí để xét
+def fitness(_solution: list) -> int:
+    """
+    Evaluate points to find the optimal solution.
+
+    Args:
+        _solution: The solution needed to evaluate.
+
+    Returns:
+        int: The point of the given solution, if it is high, it is likely to be the optimal solution.
+    """
     return 0
+# TODO: Cần phải nghĩ ra tiêu chí để xét điểm
 
+def Selection_pair(population: list, fitness_func) -> list:
+    """
+    Choose 2 random solution from population.
 
-def Selection_pair(population, fitness_func) -> list:
-    # Chọn 2 thằng bất kỳ
+    Args:
+        population:
+        fitness_func:
+
+    Returns:
+
+    """
     return choices(
         population=population,
         weights=[fitness_func(genome) for genome in population],
         k=2
     )
+# TODO: Cần phải hoàn thiện hàm Selection_pair()
 
+def Single_point_crossover(a: list, b: list) -> Tuple[list, list]:
+    """
+    Generate offsprings from given parents.
 
-def Single_point_crossover(a: list, b: list) -> [list, list]:
-    # Lai tạo
+    Args:
+        a (list): first parent.
+        b (list): second parent.
+
+    Returns:
+        (list, list): 2 Offsprings
+    """
     length = len(a)
     if length < 2:
-        return [a, b]
+        return a, b
     p = randint(1, length-1)
-    return [a[0:p] + b[p:], b[0:p] + a[p:]]
-# TODO: Cần phải làm hàm mutation để hoàn thiện thuật toán
+    return a[0:p] + b[p:], b[0:p] + a[p:]
+
+# TODO: Cần phải làm hàm Mutation()
 
 
-def Run_evolution(_population) -> list:
-    # Chạy thuật
+def Run_evolution(_population: list) -> list:
+    """
+    Runs the algorithm.
+
+    Args:
+        _population (list): Empty list to store solutions.
+
+    Returns:
+
+    """
     for i in range(50):
         _population = sorted(
             _population,
@@ -221,3 +263,4 @@ def Run_evolution(_population) -> list:
         reverse=True
     )
     return _population
+# TODO: Cần phải hoàn thiện hàm Run_evolution()
