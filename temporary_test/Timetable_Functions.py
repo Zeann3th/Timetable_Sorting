@@ -1,9 +1,10 @@
 import pandas as pd
 import numpy as np
 import copy
+from random import choices, randint
 
 
-def Grouping_location(_room: str):
+def Grouping_location(_room: str) -> int:
     """
     Grouping study locations into bigger areas
     Arguments:
@@ -69,7 +70,7 @@ def Data_cleaning(filename: str):
     return df, df1  # df, df1 = data_cleaning("TKB20231-FULL-1809.xlsx")
 
 
-def Subject_filtering(dataframe):
+def Subject_filtering(dataframe) -> dict:
     """
     Filter subjects into a dictionary
     Arguments:
@@ -93,7 +94,7 @@ def Subject_filtering(dataframe):
     return ma_hps
 
 
-def Check(dataframe, _calendar, class_id):
+def Check(dataframe, _calendar, class_id) -> bool:
     """
     Check if a class is suitable for the timetable
     Arguments:
@@ -115,7 +116,8 @@ def Check(dataframe, _calendar, class_id):
     for i in range(start, end+1):  # Hơi cồng kềnh nma ko muốn điền vào vòng lặp trước đấy =))
         _calendar[date][i] = 1
     if int(row["Mã lớp kèm"].values[0]) != class_id:
-        # Nếu mã lớp kèm != mã lớp (tránh phải duyệt hết, tuy nhiên vẫn vướng mấy lớp có tuần chẵn, tuần lẻ. e.g: SSH1131)
+        # Nếu mã lớp kèm != mã lớp (tránh phải duyệt hết, tuy nhiên vẫn vướng mấy lớp có tuần chẵn, tuần lẻ.
+        # e.g: SSH1131)
         row = dataframe[dataframe["Mã lớp"] == int(row["Mã lớp kèm"])]
         # week = int(row["Tuần"].values[0])  #TODO: Cần phải format tuần
         date = int(row["Thứ"].values[0])  # Tìm thứ
@@ -130,9 +132,9 @@ def Check(dataframe, _calendar, class_id):
 
 
 def Generate_population(k: int, dataframe, ma_hps: dict, _calendar=np.zeros((9, 1801)), _calendar_state=[],
-                        _solution=[], _population=[], _population_num=50):
+                        _solution=[], _population=[], _population_num=10):
     """
-    Finding the initial solution for the problem
+    Finding the first generation for the problem
     Arguments:
         k: int
         dataframe: filtered_data
@@ -149,7 +151,8 @@ def Generate_population(k: int, dataframe, ma_hps: dict, _calendar=np.zeros((9, 
     for maHP_items in ma_hps[key]:  # Với mỗi mã lớp của mã học phần đó
         if Check(dataframe, _calendar, maHP_items):
             # Kiểm tra xem lịch ở thời điểm đó có trống hay ko, trống thì true và điền vào lịch, đầy thì false
-            _calendar_state.append(copy.deepcopy(_calendar))  # Lưu lại lịch cũ để khi backtrack còn quay lại lịch cũ để tìm kqua mới
+            _calendar_state.append(copy.deepcopy(_calendar))
+            # Lưu lại lịch cũ để khi backtrack còn quay lại lịch cũ để tìm kqua mới
             _solution.append(maHP_items)  # Biến chứa các mã lớp hợp lệ, dùng để return
             if k == len(list(ma_hps.keys()))-1:  # nếu k == số HP nhập thì ...
                 if not _solution:  # nếu lời giải rỗng => ...
@@ -166,7 +169,55 @@ def Generate_population(k: int, dataframe, ma_hps: dict, _calendar=np.zeros((9, 
             else:  # nếu k != số HP nhập, tìm mã lớp HP tiếp theo
                 Generate_population(k + 1, dataframe, ma_hps, _calendar, _calendar_state, _solution)
                 _solution.pop()  # Nếu duyệt hết mà ko thấy mã lớp do kín lịch, backtrack và xóa mã lớp đã điền
-                _calendar_state.pop() # Xóa lịch ko hợp lệ
+                _calendar_state.pop()  # Xóa lịch ko hợp lệ
                 if len(_calendar_state) != 0:
                     _calendar = _calendar_state[-1]
+    return _population
+
+
+def fitness(_genome) -> int:
+    # Kiểm tra độ tương thích, tối ưu của lời giải
+    # Kiểm tra giờ giấc, phòng học tùy theo người đky
+    # TODO: Nghĩ ra các tiêu chí để xét
+    return 0
+
+
+def Selection_pair(population, fitness_func) -> list:
+    # Chọn 2 thằng bất kỳ
+    return choices(
+        population=population,
+        weights=[fitness_func(genome) for genome in population],
+        k=2
+    )
+
+
+def Single_point_crossover(a: list, b: list) -> [list, list]:
+    # Lai tạo
+    length = len(a)
+    if length < 2:
+        return [a, b]
+    p = randint(1, length-1)
+    return [a[0:p] + b[p:], b[0:p] + a[p:]]
+# TODO: Cần phải làm hàm mutation để hoàn thiện thuật toán
+
+
+def Run_evolution(_population) -> list:
+    # Chạy thuật
+    for i in range(50):
+        _population = sorted(
+            _population,
+            key=lambda genome: fitness(genome),
+            reverse=True
+        )
+        next_generation = _population[0:2]
+        for j in range(int(len(_population) / 2) - 1):
+            parents = Selection_pair(_population, fitness)
+            offsprings = Single_point_crossover(parents[0], parents[1])
+            next_generation += offsprings
+        _population = next_generation
+    _population = sorted(
+        _population,
+        key=lambda genome: fitness(genome),
+        reverse=True
+    )
     return _population
