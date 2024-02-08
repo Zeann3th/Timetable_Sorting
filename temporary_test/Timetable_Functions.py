@@ -129,7 +129,7 @@ def Check(dataframe, _calendar, class_id):
     return True
 
 
-def Generate_population(k: int, dataframe, ma_hps: dict, _calendar=np.zeros((9, 1801)), _calendar_state=[], _solution=[], _population=[], _population_num=20):
+def Generate_population(k: int, dataframe, ma_hps: dict, _calendar=np.zeros((9, 1801)), _calendar_state=[], _solution=[], _population=[], _population_num=50):
     """
     Finding the initial solution for the problem
     Arguments:
@@ -148,18 +148,24 @@ def Generate_population(k: int, dataframe, ma_hps: dict, _calendar=np.zeros((9, 
     for maHP_items in ma_hps[key]:  # Với mỗi mã lớp của mã học phần đó
         if Check(dataframe, _calendar, maHP_items):
             # Kiểm tra xem lịch ở thời điểm đó có trống hay ko, trống thì true và điền vào lịch, đầy thì false
-            _calendar_state.append(_calendar)  # Lưu lại lịch cũ để khi backtrack còn quay lại lịch cũ để tìm kqua mới
+            _calendar_state.append(copy.deepcopy(_calendar))  # Lưu lại lịch cũ để khi backtrack còn quay lại lịch cũ để tìm kqua mới
             _solution.append(maHP_items)  # Biến chứa các mã lớp hợp lệ, dùng để return
             if k == len(list(ma_hps.keys()))-1:  # nếu k == số HP nhập thì ...
                 if not _solution:  # nếu lời giải rỗng => ...
                     print("There is no suitable timetable right now")
                     return []
                 else:  # nếu lời giải ko rỗng => ... (Cần phải exit chỗ này)
-                    return _solution
+                    if len(_population) < _population_num:
+                        _population.append(copy.deepcopy(_solution))
+                        _solution.pop()
+                        _calendar_state.pop()
+                        _calendar = _calendar_state[-1]
+                    elif len(_population) == _population_num:
+                        return _population
             else:  # nếu k != số HP nhập, tìm mã lớp HP tiếp theo
-                result = Generate_population(k + 1, dataframe, ma_hps, _calendar, _calendar_state, _solution)
-                if result:
-                    return result
+                Generate_population(k + 1, dataframe, ma_hps, _calendar, _calendar_state, _solution)
                 _solution.pop()  # Nếu duyệt hết mà ko thấy mã lớp do kín lịch, backtrack và xóa mã lớp đã điền
-                _calendar_state.pop()  # Xóa lịch ko hợp lệ
-                _calendar = _calendar_state[-1]
+                _calendar_state.pop() # Xóa lịch ko hợp lệ
+                if len(_calendar_state) != 0:
+                    _calendar = _calendar_state[-1]
+    return _population
