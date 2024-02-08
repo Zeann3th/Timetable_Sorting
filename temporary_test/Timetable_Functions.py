@@ -129,7 +129,8 @@ def Check(dataframe, _calendar, class_id):
     return True
 
 
-def Generate_population(k: int, dataframe, ma_hps: dict, _calendar=np.zeros((9, 1801)), _calendar_state=[], _solution=[], _population=[], _population_num=50):
+def Generate_population(k: int, dataframe, ma_hps: dict, _calendar=np.zeros((9, 1801)), _calendar_state=[],
+                        _solution=[], _population=[], _population_num=50):
     """
     Finding the initial solution for the problem
     Arguments:
