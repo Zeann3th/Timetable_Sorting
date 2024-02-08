@@ -129,7 +129,7 @@ def Check(dataframe, _calendar, class_id):
     return True
 
 
-def Try(k: int, dataframe, ma_hps: dict, _calendar=np.zeros((9, 1801)), _calendar_state=[], _initial_solution=[]):
+def Generate_population(k: int, dataframe, ma_hps: dict, _calendar=np.zeros((9, 1801)), _calendar_state=[], _solution=[], _population=[], _population_num=20):
     """
     Finding the initial solution for the problem
     Arguments:
@@ -138,7 +138,9 @@ def Try(k: int, dataframe, ma_hps: dict, _calendar=np.zeros((9, 1801)), _calenda
         ma_hps: dictionary that have keys as subject's ID and values as subject's classes
         _calendar: list that have weekdays from 2 to 8 and time from 0645 to 1800 (just use the default)
         _calendar_state: empty list to store calendar
-        _initial_solution: empty list to store suitable classes
+        _solution: empty list to store suitable classes
+        _population: empty list to store solutions
+        _population_num: number of solutions
     Returns:
         Initial_solution: a list of suitable classes
     """
@@ -147,17 +149,17 @@ def Try(k: int, dataframe, ma_hps: dict, _calendar=np.zeros((9, 1801)), _calenda
         if Check(dataframe, _calendar, maHP_items):
             # Kiểm tra xem lịch ở thời điểm đó có trống hay ko, trống thì true và điền vào lịch, đầy thì false
             _calendar_state.append(_calendar)  # Lưu lại lịch cũ để khi backtrack còn quay lại lịch cũ để tìm kqua mới
-            _initial_solution.append(maHP_items)  # Biến chứa các mã lớp hợp lệ, dùng để return
+            _solution.append(maHP_items)  # Biến chứa các mã lớp hợp lệ, dùng để return
             if k == len(list(ma_hps.keys()))-1:  # nếu k == số HP nhập thì ...
-                if not _initial_solution:  # nếu lời giải rỗng => ...
+                if not _solution:  # nếu lời giải rỗng => ...
                     print("There is no suitable timetable right now")
                     return []
                 else:  # nếu lời giải ko rỗng => ... (Cần phải exit chỗ này)
-                    return _initial_solution
+                    return _solution
             else:  # nếu k != số HP nhập, tìm mã lớp HP tiếp theo
-                result = Try(k + 1, dataframe, ma_hps, _calendar, _calendar_state, _initial_solution)
+                result = Generate_population(k + 1, dataframe, ma_hps, _calendar, _calendar_state, _solution)
                 if result:
                     return result
-                _initial_solution.pop()  # Nếu duyệt hết mà ko thấy mã lớp do kín lịch, backtrack và xóa mã lớp đã điền
+                _solution.pop()  # Nếu duyệt hết mà ko thấy mã lớp do kín lịch, backtrack và xóa mã lớp đã điền
                 _calendar_state.pop()  # Xóa lịch ko hợp lệ
                 _calendar = _calendar_state[-1]

@@ -14,5 +14,5 @@ maHPs = Tf.Subject_filtering(filtered_data)
 # Function works!!!, uncomment to test it
 # print(maHPs)
 
-solution = Tf.Try(0, filtered_data, maHPs)
+solution = Tf.Generate_population(0, filtered_data, maHPs)
 print(solution)
