@@ -112,29 +112,39 @@ def Check(dataframe: pd.DataFrame, _calendar: np.ndarray, class_id: int) -> bool
     Returns:
         bool: True if it is safe to fill in that class, False if it is not.
     """
+
+    def Check_time_slot(_date: int, _start: int, _end: int):
+        for i in range(_start, _end + 1):  # Nếu lướt qua mà có thấy có môn học ở thời gian này thì trả về False
+            if _calendar[_date][i] == 1:
+                return False
+        for i in range(_start, _end + 1):  # Hơi cồng kềnh nma ko muốn điền vào vòng lặp trước đấy =))
+            _calendar[_date][i] = 1
+        return True
+    # Kiểm tra lịch cho lớp `BT`/ `LT+BT`
     row = dataframe[dataframe["Mã lớp"] == class_id]  # Tìm hàng có "Mã lớp" == mã lớp bài tập đang chọn
     # week = int(row["Tuần"].values[0])  #TODO: Cần phải format tuần
     date = int(row["Thứ"].values[0])  # Tìm thứ
     start = int(row["Bắt đầu"].values[0])  # Tìm giờ bắt đầu
     end = int(row["Kết thúc"].values[0])  # Tìm giờ kết thúc
-    for i in range(start, end + 1):  # Nếu lướt qua mà có thấy có môn học ở thời gian này thì trả về False
-        if _calendar[date][i] == 1:
+    if not Check_time_slot(date, start, end):
+        return False
+    # Kiểm tra lịch cho lớp `LT+BT` nếu nó có 2 buổi học
+    if len(row["Thứ"].values) > 1:
+        date = int(row["Thứ"].values[1])  # Tìm thứ
+        start = int(row["Bắt đầu"].values[1])  # Tìm giờ bắt đầu
+        end = int(row["Kết thúc"].values[1])  # Tìm giờ kết thúc
+        if not Check_time_slot(date, start, end):
             return False
-    for i in range(start, end+1):  # Hơi cồng kềnh nma ko muốn điền vào vòng lặp trước đấy =))
-        _calendar[date][i] = 1
+    # Kiểm tra lịch cho lớp `LT` đi kèm với lớp `BT` đã chọn
     if int(row["Mã lớp kèm"].values[0]) != class_id:
-        # Nếu mã lớp kèm != mã lớp (tránh phải duyệt hết, tuy nhiên vẫn vướng mấy lớp có tuần chẵn, tuần lẻ.
-        # e.g: SSH1131)
         row = dataframe[dataframe["Mã lớp"] == int(row["Mã lớp kèm"])]
         # week = int(row["Tuần"].values[0])  #TODO: Cần phải format tuần
         date = int(row["Thứ"].values[0])  # Tìm thứ
         start = int(row["Bắt đầu"].values[0])  # Tìm giờ bắt đầu
         end = int(row["Kết thúc"].values[0])  # Tìm giờ kết thúc
-        for i in range(start, end + 1):  # Nếu lướt qua mà có thấy có môn học ở thời gian này thì trả về False
-            if _calendar[date][i] == 1:
-                return False
-        for i in range(start, end + 1):  # Hơi cồng kềnh nma ko muốn điền vào vòng lặp trước đấy =))
-            _calendar[date][i] = 1
+        if not Check_time_slot(date, start, end):
+            return False
+
     return True
 
 
