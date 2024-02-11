@@ -3,11 +3,15 @@ import numpy as np
 import copy
 from random import choices, randint
 from typing import Tuple
+desired_width = 320
+pd.set_option('display.width', desired_width)
+np.set_printoptions(linewidth=desired_width)
+pd.set_option('display.max_columns', 15)
 
 
-def Grouping_location(_room: str) -> int:
+def Group_location(_room: str) -> int:
     """
-    Grouping study locations into bigger areas.
+    Group study locations into bigger areas.
 
     Args:
         _room (str): A Room in school. e.g: 'D3-301'.
@@ -33,7 +37,46 @@ def Grouping_location(_room: str) -> int:
     return 7
 
 
-def Data_cleaning(filename: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
+def Sort_Session(_session: int, _time: str) -> int:
+    """
+    Sort sessions. e.g: 1 (morning) -> 1; 1 (afternoon) -> 7; PE classes have time periods so 15:30-16:30 -> 10-11.
+
+    Args:
+        _session (int): The original session
+        _time (str): To check if it is past 1230 or not.
+
+    Returns:
+        int: The modified session.
+    """
+    time_to_session = {
+        range(645, 731): 1,
+        range(730, 816): 2,
+        range(825, 911): 3,
+        range(920, 1006): 4,
+        range(1015, 1101): 5,
+        range(1100, 1146): 6,
+        range(1230, 1316): 7,
+        range(1315, 1401): 8,
+        range(1410, 1456): 9,
+        range(1505, 1551): 10,
+        range(1600, 1646): 11,
+        range(1645, 1731): 12,
+        range(1745, 1831): 13,
+        range(1830, 1916): 14
+    }
+
+    if _session in range(1, 7):
+        _session = (_session + 6) if int(_time) > 1230 else _session
+    else:
+        for time_range, session_number in time_to_session.items():
+            if _session in time_range:
+                _session = session_number
+                break
+
+    return _session
+
+
+def Clean_data(filename: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     Filter, process data from a dataframe.
 
@@ -43,6 +86,7 @@ def Data_cleaning(filename: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
     Returns:
         (pd.DataFrame, pd.DataFrame): Unfiltered_data and Filtered_data
     """
+    # Unfiltered_data
     cols = ["Kỳ", "Trường_Viện_Khoa", "Mã lớp", "Mã lớp kèm", "Mã HP", "Tên HP",
             "Tên HP Tiếng Anh", "Khối lượng", "Ghi chú", "Buổi số", "Thứ", "Thời gian",
             "Bắt đầu", "Kết thúc", "Kíp", "Tuần", "Phòng", "Cần thí nghiệm", "Số lượng đăng ký",
@@ -50,31 +94,26 @@ def Data_cleaning(filename: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
     df = pd.read_excel(filename, names=cols)
     df = df.iloc[2:]  # Delete title rows
     df.reset_index(inplace=True, drop=True)
-    df.index += 1  # indexes start at 1
-    # filter columns
-    df1 = df[["Mã lớp", "Mã lớp kèm", "Mã HP", "Tên HP", "Khối lượng", "Buổi số", "Thứ", "Thời gian", "Tuần", "Phòng",
-              "Cần thí nghiệm", "Số lượng max", "Trạng thái", "Loại lớp", "Đợt mở", "Mã quản lý"]]
+    df.index += 1
+    # Filtered_data
+    df1 = df[["Mã lớp", "Mã lớp kèm", "Mã HP", "Tên HP", "Khối lượng", "Buổi số",
+              "Thứ", "Thời gian", "Bắt đầu", "Kết thúc", "Tuần", "Phòng", "Cần thí nghiệm",
+              "Số lượng max", "Trạng thái", "Loại lớp", "Đợt mở", "Mã quản lý"]]
     df1["Cần thí nghiệm"] = (df1["Cần thí nghiệm"] == "TN").astype(int)  # "TN" -> 1 and "NULL" -> 0
     df1 = df1[df1["Thứ"].notnull()]  # Eliminate classes with no date values
-    # Manipulate time -> start_time, end_time
-    start_time = []
-    end_time = []
-    for time in (df1["Thời gian"].to_numpy().tolist()):
-        start_time.append(time[:4])
-        end_time.append(time[5:])
-    df1.insert(loc=7, column="Bắt đầu", value=start_time)
-    df1.insert(loc=8, column="Kết thúc", value=end_time)
-    del df1["Thời gian"]
+    df1["Bắt đầu"] = df1.apply(lambda row: Sort_Session(row["Bắt đầu"], row["Thời gian"][:4]), axis=1)
+    df1["Kết thúc"] = df1.apply(lambda row: Sort_Session(row["Kết thúc"], row["Thời gian"][5:]), axis=1)
+    del df1["Thời gian"]  # Delete after separation
     df1["Phòng"] = df1["Phòng"].astype(str)
     group_num = []
     for room in (df1["Phòng"].to_numpy().tolist()):
-        group_num.append(Grouping_location(room))
+        group_num.append(Group_location(room))
     df1.insert(loc=11, column="Khu", value=group_num)
     del df1["Phòng"]
-    return df, df1  # df, df1 = data_cleaning("TKB20231-FULL-1809.xlsx")
+    return df, df1  # df, df1 = Data_cleaning("TKB20231-FULL-1809.xlsx")
 
 
-def Subject_filtering(dataframe: pd.DataFrame) -> dict:
+def Filter_subject(dataframe: pd.DataFrame) -> dict:
     """
     Filter subjects into a dictionary.
 
@@ -113,7 +152,18 @@ def Check(dataframe: pd.DataFrame, _calendar: np.ndarray, class_id: int) -> bool
         bool: True if it is safe to fill in that class, False if it is not.
     """
 
-    def Check_time_slot(_date: int, _start: int, _end: int):
+    def Check_time_slot(_date: int, _start: int, _end: int) -> bool:
+        """
+        Check if that slot in calendar is safe/empty to fill in a subject.
+
+        Args:
+            _date (int): Weekdays from Mon to Sun (2-8).
+            _start (int): The start time.
+            _end (int): The end time.
+
+        Returns:
+            bool: True if it is empty/safe, False if it is occupied.
+        """
         for i in range(_start, _end + 1):  # Nếu lướt qua mà có thấy có môn học ở thời gian này thì trả về False
             if _calendar[_date][i] == 1:
                 return False
@@ -148,7 +198,7 @@ def Check(dataframe: pd.DataFrame, _calendar: np.ndarray, class_id: int) -> bool
     return True
 
 
-def Generate_population(k: int, dataframe, ma_hps: dict, _calendar=np.zeros((9, 1801)), _calendar_state: list = [],
+def Generate_population(k: int, dataframe, ma_hps: dict, _calendar=np.zeros((9, 15)), _calendar_state: list = [],
                         _solution: list = [], _population: list = [], _population_num: int = 10) -> list:
     """
     Finding the first generation for the problem.

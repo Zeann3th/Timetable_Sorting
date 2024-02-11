@@ -5,12 +5,12 @@ warnings.filterwarnings("ignore")
 
 
 filename = askopenfilename()
-unfiltered_data, filtered_data = Tf.Data_cleaning(filename)
+unfiltered_data, filtered_data = Tf.Clean_data(filename)
 # Function works!!!, uncomment to test it
 # print(unfiltered_data)
 # print(filtered_data)
 
-maHPs = Tf.Subject_filtering(filtered_data)
+maHPs = Tf.Filter_subject(filtered_data)
 # Function works!!!, uncomment to test it
 # print(maHPs)
 
