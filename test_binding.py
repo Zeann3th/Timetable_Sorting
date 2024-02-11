@@ -2,7 +2,7 @@ import os
 import sys
 from PySide6 import QtWidgets
 from __feature__ import snake_case, true_property
-import temporary_test.Timetable_Functions as core_funcs
+import Timetable_Functions as core_funcs
 from ui_package.ui_components import MainWindow
 
 

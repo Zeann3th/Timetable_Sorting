@@ -3,10 +3,6 @@ import numpy as np
 import copy
 from random import choices, randint
 from typing import Tuple
-desired_width = 320
-pd.set_option('display.width', desired_width)
-np.set_printoptions(linewidth=desired_width)
-pd.set_option('display.max_columns', 15)
 
 
 def Group_location(_room: str) -> int:
@@ -191,7 +187,7 @@ def Check(dataframe: pd.DataFrame, _calendar: np.ndarray, class_id: int) -> bool
     row = dataframe[dataframe["Mã lớp"] == class_id]  # Tìm hàng có "Mã lớp" == mã lớp bài tập đang chọn
     # week = row["Tuần"].values[0]  #TODO: Cần phải format tuần
     date = int(row["Thứ"].values[0])  # Tìm thứ
-    start = int(row["Bắt đầu"].values[0]) # Tìm giờ bắt đầu
+    start = int(row["Bắt đầu"].values[0])  # Tìm giờ bắt đầu
     end = int(row["Kết thúc"].values[0])  # Tìm giờ kết thúc
     if not Check_time_slot(date, start, end):
         return False
