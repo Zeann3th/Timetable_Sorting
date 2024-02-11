@@ -1,15 +1,23 @@
 import pandas as pd
 import numpy as np
 import copy
+from random import choices, randint
+from typing import Tuple
+desired_width = 320
+pd.set_option('display.width', desired_width)
+np.set_printoptions(linewidth=desired_width)
+pd.set_option('display.max_columns', 15)
 
 
-def Grouping_location(_room: str):
+def Group_location(_room: str) -> int:
     """
-    Grouping study locations into bigger areas
-    Arguments:
-        _room: a string. e.g: 'D3-301'
+    Group study locations into bigger areas.
+
+    Args:
+        _room (str): A Room in school. e.g: 'D3-301'.
+
     Returns:
-         The code for the area where the room is located
+         int: The code area where the room is located.
     """
     building = _room[:2] if _room[2] == "-" else _room[:3]
     if building in ["D3", "D5"]:
@@ -29,15 +37,69 @@ def Grouping_location(_room: str):
     return 7
 
 
-def Data_cleaning(filename: str):
+def Sort_Session(_session: int, _time: str) -> int:
     """
-    Clean data from a dataframe
-    Arguments:
-        filename: a string contains the name of an Excel file ('.xlsx' tail)
+    Sort sessions. e.g: 1 (morning) -> 1; 1 (afternoon) -> 7; PE classes have time periods so 15:30-16:30 -> 10-11.
+
+    Args:
+        _session (int): The original session
+        _time (str): To check if it is past 1230 or not.
+
     Returns:
-        Unfiltered_data: full data of the table, without no cuts.
-        Filtered_data: A shorter version of Unfiltered_data, contains necessary information for the algorithm to work.
+        int: The modified session.
     """
+    time_to_session = {
+        range(600, 731): 1,
+        range(730, 820): 2,
+        range(820, 915): 3,
+        range(915, 1010): 4,
+        range(1010, 1101): 5,
+        range(1100, 1146): 6,
+        range(1230, 1316): 7,
+        range(1315, 1405): 8,
+        range(1405, 1500): 9,
+        range(1500, 1555): 10,
+        range(1555, 1646): 11,
+        range(1645, 1731): 12,
+        range(1745, 1831): 13,
+        range(1830, 1916): 14
+    }
+
+    if _session in range(1, 7):
+        _session = (_session + 6) if int(_time) >= 1230 else _session
+    else:
+        for time_range, session_number in time_to_session.items():
+            if _session in time_range:
+                _session = session_number
+                break
+
+    return _session
+
+
+def Sort_Weeks(_week_list: str) -> str:
+    final_week_list = []
+    for weeks in str(_week_list).split(","):
+        if "-" in str(weeks):
+            week = str(weeks).split("-")
+            for i in range(int(week[0]), int(week[1]) + 1):
+                final_week_list.append(i)
+        else:
+            final_week_list.append(weeks)
+    final_week_list = [str(x) for x in final_week_list]
+    return ", ".join(final_week_list)
+
+
+def Clean_data(filename: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    """
+    Filter, process data from a dataframe.
+
+    Args:
+        filename (str): A string contains the name of an Excel file ('.xlsx' tail).
+
+    Returns:
+        (pd.DataFrame, pd.DataFrame): Unfiltered_data and Filtered_data
+    """
+    # Unfiltered_data
     cols = ["Kỳ", "Trường_Viện_Khoa", "Mã lớp", "Mã lớp kèm", "Mã HP", "Tên HP",
             "Tên HP Tiếng Anh", "Khối lượng", "Ghi chú", "Buổi số", "Thứ", "Thời gian",
             "Bắt đầu", "Kết thúc", "Kíp", "Tuần", "Phòng", "Cần thí nghiệm", "Số lượng đăng ký",
@@ -45,37 +107,38 @@ def Data_cleaning(filename: str):
     df = pd.read_excel(filename, names=cols)
     df = df.iloc[2:]  # Delete title rows
     df.reset_index(inplace=True, drop=True)
-    df.index += 1  # indexes start at 1
-    # filter columns
-    df1 = df[["Mã lớp", "Mã lớp kèm", "Mã HP", "Tên HP", "Khối lượng", "Buổi số", "Thứ", "Thời gian", "Tuần", "Phòng",
-              "Cần thí nghiệm", "Số lượng max", "Trạng thái", "Loại lớp", "Đợt mở", "Mã quản lý"]]
+    df.index += 1
+    # Filtered_data
+    df1 = df[["Mã lớp", "Mã lớp kèm", "Mã HP", "Tên HP", "Khối lượng", "Buổi số",
+              "Thứ", "Thời gian", "Bắt đầu", "Kết thúc", "Tuần", "Phòng", "Cần thí nghiệm",
+              "Số lượng max", "Trạng thái", "Loại lớp", "Đợt mở", "Mã quản lý"]]
     df1["Cần thí nghiệm"] = (df1["Cần thí nghiệm"] == "TN").astype(int)  # "TN" -> 1 and "NULL" -> 0
     df1 = df1[df1["Thứ"].notnull()]  # Eliminate classes with no date values
-    # Manipulate time -> start_time, end_time
-    start_time = []
-    end_time = []
-    for time in (df1["Thời gian"].to_numpy().tolist()):
-        start_time.append(time[:4])
-        end_time.append(time[5:])
-    df1.insert(loc=7, column="Bắt đầu", value=start_time)
-    df1.insert(loc=8, column="Kết thúc", value=end_time)
-    del df1["Thời gian"]
+    # Modify start_session and end_session
+    df1["Bắt đầu"] = df1.apply(lambda row: Sort_Session(row["Bắt đầu"], row["Thời gian"][:4]), axis=1)
+    df1["Kết thúc"] = df1.apply(lambda row: Sort_Session(row["Kết thúc"], row["Thời gian"][5:]), axis=1)
+    del df1["Thời gian"]  # Delete after separation
+    # Modify Weeks for better comprehension
+    df1["Tuần"] = df1.apply(lambda row: Sort_Weeks(row["Tuần"]), axis=1)
+    # Modify Rooms to Area codes
     df1["Phòng"] = df1["Phòng"].astype(str)
     group_num = []
     for room in (df1["Phòng"].to_numpy().tolist()):
-        group_num.append(Grouping_location(room))
+        group_num.append(Group_location(room))
     df1.insert(loc=11, column="Khu", value=group_num)
     del df1["Phòng"]
-    return df, df1  # df, df1 = data_cleaning("TKB20231-FULL-1809.xlsx")
+    return df, df1  # df, df1 = Data_cleaning("TKB20231-FULL-1809.xlsx")
 
 
-def Subject_filtering(dataframe):
+def Filter_subject(dataframe: pd.DataFrame) -> dict:
     """
-    Filter subjects into a dictionary
-    Arguments:
-      dataframe: a dataframe. To be precise, please use the Filtered_data.
+    Filter subjects into a dictionary.
+
+    Args:
+      dataframe (pd.DataFrame): Filtered_data.
+
     Returns:
-       A dictionary contains the subject IDs as keys and their corresponding classes IDs as values
+       dict: A dictionary contains the subject IDs as keys and their corresponding classes IDs as values.
     """
     ma_hps = {}
     ma_hp = ""
@@ -93,71 +156,190 @@ def Subject_filtering(dataframe):
     return ma_hps
 
 
-def Check(dataframe, _calendar, class_id):
+def Check(dataframe: pd.DataFrame, _calendar: np.ndarray, class_id: int) -> bool:
     """
-    Check if a class is suitable for the timetable
-    Arguments:
-        dataframe: filtered_data
-        _calendar: list that have weekdays from 2 to 8 and time from 0645 to 1800 (just use the default)
-        class_id: ID of classes. e.g: `151128`
+    Check if a class is suitable for the timetable.
+
+    Args:
+        dataframe (pd.DataFrame): Filtered_data.
+        _calendar (np.ndarray): Numpy array that have weekdays from 2 to 8 and time from 1 to 14.
+        class_id (int): ID of classes. e.g: `151128`.
+
     Returns:
-        True if it is safe to fill in that class
-        False if it is not
+        bool: True if it is safe to fill in that class, False if it is not.
     """
+
+    def Check_time_slot(_date: int, _start: int, _end: int) -> bool:
+        """
+        Check if that slot in calendar is safe/empty to fill in a subject.
+
+        Args:
+            _date (int): Weekdays from Mon to Sun (2-8).
+            _start (int): The start time.
+            _end (int): The end time.
+
+        Returns:
+            bool: True if it is empty/safe, False if it is occupied.
+        """
+        for i in range(_start, _end + 1):  # Nếu lướt qua mà có thấy có môn học ở thời gian này thì trả về False
+            if _calendar[_date][i] == 1:
+                return False
+        for i in range(_start, _end + 1):  # Hơi cồng kềnh nma ko muốn điền vào vòng lặp trước đấy =))
+            _calendar[_date][i] = 1
+        return True
+    # Kiểm tra lịch cho lớp `BT`/ `LT+BT`
     row = dataframe[dataframe["Mã lớp"] == class_id]  # Tìm hàng có "Mã lớp" == mã lớp bài tập đang chọn
-    # week = int(row["Tuần"].values[0])  #TODO: Cần phải format tuần
+    # week = row["Tuần"].values[0]  #TODO: Cần phải format tuần
     date = int(row["Thứ"].values[0])  # Tìm thứ
-    start = int(row["Bắt đầu"].values[0])  # Tìm giờ bắt đầu
+    start = int(row["Bắt đầu"].values[0]) # Tìm giờ bắt đầu
     end = int(row["Kết thúc"].values[0])  # Tìm giờ kết thúc
-    for i in range(start, end + 1):  # Nếu lướt qua mà có thấy có môn học ở thời gian này thì trả về False
-        if _calendar[date][i] == 1:
+    if not Check_time_slot(date, start, end):
+        return False
+    # Kiểm tra lịch cho lớp `LT+BT` nếu nó có 2 buổi học
+    if len(row["Thứ"].values) > 1:
+        date = int(row["Thứ"].values[1])  # Tìm thứ
+        start = int(row["Bắt đầu"].values[1])  # Tìm giờ bắt đầu
+        end = int(row["Kết thúc"].values[1])  # Tìm giờ kết thúc
+        if not Check_time_slot(date, start, end):
             return False
-    for i in range(start, end+1):  # Hơi cồng kềnh nma ko muốn điền vào vòng lặp trước đấy =))
-        _calendar[date][i] = 1
+    # Kiểm tra lịch cho lớp `LT` đi kèm với lớp `BT` đã chọn
     if int(row["Mã lớp kèm"].values[0]) != class_id:
-        # Nếu mã lớp kèm != mã lớp (tránh phải duyệt hết, tuy nhiên vẫn vướng mấy lớp có tuần chẵn, tuần lẻ. e.g: SSH1131)
         row = dataframe[dataframe["Mã lớp"] == int(row["Mã lớp kèm"])]
         # week = int(row["Tuần"].values[0])  #TODO: Cần phải format tuần
         date = int(row["Thứ"].values[0])  # Tìm thứ
         start = int(row["Bắt đầu"].values[0])  # Tìm giờ bắt đầu
         end = int(row["Kết thúc"].values[0])  # Tìm giờ kết thúc
-        for i in range(start, end + 1):  # Nếu lướt qua mà có thấy có môn học ở thời gian này thì trả về False
-            if _calendar[date][i] == 1:
-                return False
-        for i in range(start, end + 1):  # Hơi cồng kềnh nma ko muốn điền vào vòng lặp trước đấy =))
-            _calendar[date][i] = 1
+        if not Check_time_slot(date, start, end):
+            return False
+
     return True
 
 
-def Try(k: int, dataframe, ma_hps: dict, _calendar=np.zeros((9, 1801)), _calendar_state=[], _initial_solution=[]):
+def Generate_population(k: int, dataframe, ma_hps: dict, _calendar=np.zeros((9, 15)), _calendar_state: list = [],
+                        _solution: list = [], _population: list = [], _population_num: int = 10) -> list:
     """
-    Finding the initial solution for the problem
-    Arguments:
-        k: int
-        dataframe: filtered_data
-        ma_hps: dictionary that have keys as subject's ID and values as subject's classes
-        _calendar: list that have weekdays from 2 to 8 and time from 0645 to 1800 (just use the default)
-        _calendar_state: empty list to store calendar
-        _initial_solution: empty list to store suitable classes
+    Finding the first generation for the problem.
+
+    Args:
+        k (int): The index of subjects.
+        dataframe (pd.DataFrame): Filtered_data.
+        ma_hps (dict): Dictionary that have keys as subject's ID and values as subject's classes.
+        _calendar (np.ndarray): Numpy array that have weekdays from 2 to 8 and time from 1 to 14.
+        _calendar_state (list): Empty list to store calendars.
+        _solution (list): Empty list to store suitable classes.
+        _population (list): Empty list to store solutions.
+        _population_num (int): Number of solutions.
+
     Returns:
-        Initial_solution: a list of suitable classes
+        list: a list of solutions.
     """
     key = list(ma_hps.keys())[k]  # Chọn mã học phần đã nhập (với k khác nhau thì là mã HP khác nhau)
     for maHP_items in ma_hps[key]:  # Với mỗi mã lớp của mã học phần đó
         if Check(dataframe, _calendar, maHP_items):
             # Kiểm tra xem lịch ở thời điểm đó có trống hay ko, trống thì true và điền vào lịch, đầy thì false
-            _calendar_state.append(_calendar)  # Lưu lại lịch cũ để khi backtrack còn quay lại lịch cũ để tìm kqua mới
-            _initial_solution.append(maHP_items)  # Biến chứa các mã lớp hợp lệ, dùng để return
+            _calendar_state.append(copy.deepcopy(_calendar))
+            # Lưu lại lịch cũ để khi backtrack còn quay lại lịch cũ để tìm kqua mới
+            _solution.append(maHP_items)  # Biến chứa các mã lớp hợp lệ, dùng để return
             if k == len(list(ma_hps.keys()))-1:  # nếu k == số HP nhập thì ...
-                if not _initial_solution:  # nếu lời giải rỗng => ...
+                if not _solution:  # nếu lời giải rỗng => ...
                     print("There is no suitable timetable right now")
                     return []
                 else:  # nếu lời giải ko rỗng => ... (Cần phải exit chỗ này)
-                    return _initial_solution
+                    if len(_population) < _population_num:
+                        _population.append(copy.deepcopy(_solution))
+                        _solution.pop()
+                        _calendar_state.pop()
+                        _calendar = _calendar_state[-1]
+                    elif len(_population) == _population_num:
+                        return _population
             else:  # nếu k != số HP nhập, tìm mã lớp HP tiếp theo
-                result = Try(k + 1, dataframe, ma_hps, _calendar, _calendar_state, _initial_solution)
-                if result:
-                    return result
-                _initial_solution.pop()  # Nếu duyệt hết mà ko thấy mã lớp do kín lịch, backtrack và xóa mã lớp đã điền
+                Generate_population(k + 1, dataframe, ma_hps, _calendar, _calendar_state, _solution)
+                _solution.pop()  # Nếu duyệt hết mà ko thấy mã lớp do kín lịch, backtrack và xóa mã lớp đã điền
                 _calendar_state.pop()  # Xóa lịch ko hợp lệ
-                _calendar = _calendar_state[-1]
+                if len(_calendar_state) != 0:
+                    _calendar = _calendar_state[-1]
+    return _population
+
+
+def fitness(_solution: list) -> int:
+    """
+    Evaluate points to find the optimal solution.
+
+    Args:
+        _solution: The solution needed to evaluate.
+
+    Returns:
+        int: The point of the given solution, if it is high, it is likely to be the optimal solution.
+    """
+    return 0
+# TODO: Cần phải nghĩ ra tiêu chí để xét điểm
+
+
+def Selection_pair(population: list, fitness_func) -> list:
+    """
+    Choose 2 random solution from population.
+
+    Args:
+        population:
+        fitness_func:
+
+    Returns:
+
+    """
+    return choices(
+        population=population,
+        weights=[fitness_func(genome) for genome in population],
+        k=2
+    )
+# TODO: Cần phải hoàn thiện hàm Selection_pair()
+
+
+def Single_point_crossover(a: list, b: list) -> Tuple[list, list]:
+    """
+    Generate offsprings from given parents.
+
+    Args:
+        a (list): first parent.
+        b (list): second parent.
+
+    Returns:
+        (list, list): 2 Offsprings
+    """
+    length = len(a)
+    if length < 2:
+        return a, b
+    p = randint(1, length-1)
+    return a[0:p] + b[p:], b[0:p] + a[p:]
+
+# TODO: Cần phải làm hàm Mutation()
+
+
+def Run_evolution(_population: list) -> list:
+    """
+    Runs the algorithm.
+
+    Args:
+        _population (list): Empty list to store solutions.
+
+    Returns:
+
+    """
+    for i in range(50):
+        _population = sorted(
+            _population,
+            key=lambda genome: fitness(genome),
+            reverse=True
+        )
+        next_generation = _population[0:2]
+        for j in range(int(len(_population) / 2) - 1):
+            parents = Selection_pair(_population, fitness)
+            offsprings = Single_point_crossover(parents[0], parents[1])
+            next_generation += offsprings
+        _population = next_generation
+    _population = sorted(
+        _population,
+        key=lambda genome: fitness(genome),
+        reverse=True
+    )
+    return _population
+# TODO: Cần phải hoàn thiện hàm Run_evolution()
