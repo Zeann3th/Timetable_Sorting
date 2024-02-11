@@ -49,24 +49,24 @@ def Sort_Session(_session: int, _time: str) -> int:
         int: The modified session.
     """
     time_to_session = {
-        range(645, 731): 1,
-        range(730, 816): 2,
-        range(825, 911): 3,
-        range(920, 1006): 4,
-        range(1015, 1101): 5,
+        range(600, 731): 1,
+        range(730, 820): 2,
+        range(820, 915): 3,
+        range(915, 1010): 4,
+        range(1010, 1101): 5,
         range(1100, 1146): 6,
         range(1230, 1316): 7,
-        range(1315, 1401): 8,
-        range(1410, 1456): 9,
-        range(1505, 1551): 10,
-        range(1600, 1646): 11,
+        range(1315, 1405): 8,
+        range(1405, 1500): 9,
+        range(1500, 1555): 10,
+        range(1555, 1646): 11,
         range(1645, 1731): 12,
         range(1745, 1831): 13,
         range(1830, 1916): 14
     }
 
     if _session in range(1, 7):
-        _session = (_session + 6) if int(_time) > 1230 else _session
+        _session = (_session + 6) if int(_time) >= 1230 else _session
     else:
         for time_range, session_number in time_to_session.items():
             if _session in time_range:
@@ -74,6 +74,19 @@ def Sort_Session(_session: int, _time: str) -> int:
                 break
 
     return _session
+
+
+def Sort_Weeks(_week_list: str) -> str:
+    final_week_list = []
+    for weeks in str(_week_list).split(","):
+        if "-" in str(weeks):
+            week = str(weeks).split("-")
+            for i in range(int(week[0]), int(week[1]) + 1):
+                final_week_list.append(i)
+        else:
+            final_week_list.append(weeks)
+    final_week_list = [str(x) for x in final_week_list]
+    return ", ".join(final_week_list)
 
 
 def Clean_data(filename: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
@@ -101,9 +114,13 @@ def Clean_data(filename: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
               "Số lượng max", "Trạng thái", "Loại lớp", "Đợt mở", "Mã quản lý"]]
     df1["Cần thí nghiệm"] = (df1["Cần thí nghiệm"] == "TN").astype(int)  # "TN" -> 1 and "NULL" -> 0
     df1 = df1[df1["Thứ"].notnull()]  # Eliminate classes with no date values
+    # Modify start_session and end_session
     df1["Bắt đầu"] = df1.apply(lambda row: Sort_Session(row["Bắt đầu"], row["Thời gian"][:4]), axis=1)
     df1["Kết thúc"] = df1.apply(lambda row: Sort_Session(row["Kết thúc"], row["Thời gian"][5:]), axis=1)
     del df1["Thời gian"]  # Delete after separation
+    # Modify Weeks for better comprehension
+    df1["Tuần"] = df1.apply(lambda row: Sort_Weeks(row["Tuần"]), axis=1)
+    # Modify Rooms to Area codes
     df1["Phòng"] = df1["Phòng"].astype(str)
     group_num = []
     for room in (df1["Phòng"].to_numpy().tolist()):
@@ -145,7 +162,7 @@ def Check(dataframe: pd.DataFrame, _calendar: np.ndarray, class_id: int) -> bool
 
     Args:
         dataframe (pd.DataFrame): Filtered_data.
-        _calendar (np.ndarray): Numpy array that have weekdays from 2 to 8 and time from 0645 to 1800.
+        _calendar (np.ndarray): Numpy array that have weekdays from 2 to 8 and time from 1 to 14.
         class_id (int): ID of classes. e.g: `151128`.
 
     Returns:
@@ -172,9 +189,9 @@ def Check(dataframe: pd.DataFrame, _calendar: np.ndarray, class_id: int) -> bool
         return True
     # Kiểm tra lịch cho lớp `BT`/ `LT+BT`
     row = dataframe[dataframe["Mã lớp"] == class_id]  # Tìm hàng có "Mã lớp" == mã lớp bài tập đang chọn
-    # week = int(row["Tuần"].values[0])  #TODO: Cần phải format tuần
+    # week = row["Tuần"].values[0]  #TODO: Cần phải format tuần
     date = int(row["Thứ"].values[0])  # Tìm thứ
-    start = int(row["Bắt đầu"].values[0])  # Tìm giờ bắt đầu
+    start = int(row["Bắt đầu"].values[0]) # Tìm giờ bắt đầu
     end = int(row["Kết thúc"].values[0])  # Tìm giờ kết thúc
     if not Check_time_slot(date, start, end):
         return False
@@ -207,7 +224,7 @@ def Generate_population(k: int, dataframe, ma_hps: dict, _calendar=np.zeros((9, 
         k (int): The index of subjects.
         dataframe (pd.DataFrame): Filtered_data.
         ma_hps (dict): Dictionary that have keys as subject's ID and values as subject's classes.
-        _calendar (np.ndarray): Numpy array that have weekdays from 2 to 8 and time from 0645 to 1800.
+        _calendar (np.ndarray): Numpy array that have weekdays from 2 to 8 and time from 1 to 14.
         _calendar_state (list): Empty list to store calendars.
         _solution (list): Empty list to store suitable classes.
         _population (list): Empty list to store solutions.
