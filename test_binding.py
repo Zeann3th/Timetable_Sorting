@@ -1,8 +1,7 @@
 import os
 import sys
 from PySide6 import QtWidgets
-from __feature__ import snake_case, true_property
-import Timetable_Functions as core_funcs
+from src import timetable_functions as core_funcs
 from ui_package.ui_components import MainWindow
 
 
@@ -12,6 +11,7 @@ def create_root_dir():
         file.write(curr_dir)
     with open("./ui_package/root_directory.txt", "w+") as file:
         file.write(curr_dir)
+
 
 class FunctionalMainWindow(MainWindow):
     def __init__(self, *args, **kwargs):
@@ -57,6 +57,7 @@ class FunctionalMainWindow(MainWindow):
 
     def validate_input_data(self):
         pass
+
 
 if __name__ == '__main__':
     create_root_dir()

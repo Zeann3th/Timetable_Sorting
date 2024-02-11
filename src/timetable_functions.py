@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import copy
-from random import choices, randint
+from random import randint
 from typing import Tuple
 
 
@@ -33,9 +33,9 @@ def Group_location(_room: str) -> int:
     return 7
 
 
-def Sort_Session(_session: int, _time: str) -> int:
+def Format_session(_session: int, _time: str) -> int:
     """
-    Sort sessions. e.g: 1 (morning) -> 1; 1 (afternoon) -> 7; PE classes have time periods so 15:30-16:30 -> 10-11.
+    Format sessions. e.g: 1 (morning) -> 1; 1 (afternoon) -> 7; PE classes have time periods so 15:30-16:30 -> 10-11.
 
     Args:
         _session (int): The original session
@@ -72,7 +72,16 @@ def Sort_Session(_session: int, _time: str) -> int:
     return _session
 
 
-def Sort_Weeks(_week_list: str) -> str:
+def Format_weeks(_week_list: str) -> str:
+    """
+    Format weeks. e.g: 25-32 -> 25,26,27,28,29,30,31,32...
+
+    Args:
+        _week_list (str): A string containing weeks separated by commas.
+
+    Returns:
+        str: A string containing formated weeks separated by commas.
+    """
     final_week_list = []
     for weeks in str(_week_list).split(","):
         if "-" in str(weeks):
@@ -111,11 +120,11 @@ def Clean_data(filename: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
     df1["Cần thí nghiệm"] = (df1["Cần thí nghiệm"] == "TN").astype(int)  # "TN" -> 1 and "NULL" -> 0
     df1 = df1[df1["Thứ"].notnull()]  # Eliminate classes with no date values
     # Modify start_session and end_session
-    df1["Bắt đầu"] = df1.apply(lambda row: Sort_Session(row["Bắt đầu"], row["Thời gian"][:4]), axis=1)
-    df1["Kết thúc"] = df1.apply(lambda row: Sort_Session(row["Kết thúc"], row["Thời gian"][5:]), axis=1)
+    df1["Bắt đầu"] = df1.apply(lambda row: Format_session(row["Bắt đầu"], row["Thời gian"][:4]), axis=1)
+    df1["Kết thúc"] = df1.apply(lambda row: Format_session(row["Kết thúc"], row["Thời gian"][5:]), axis=1)
     del df1["Thời gian"]  # Delete after separation
     # Modify Weeks for better comprehension
-    df1["Tuần"] = df1.apply(lambda row: Sort_Weeks(row["Tuần"]), axis=1)
+    df1["Tuần"] = df1.apply(lambda row: Format_weeks(row["Tuần"]), axis=1)
     # Modify Rooms to Area codes
     df1["Phòng"] = df1["Phòng"].astype(str)
     group_num = []
@@ -165,11 +174,12 @@ def Check(dataframe: pd.DataFrame, _calendar: np.ndarray, class_id: int) -> bool
         bool: True if it is safe to fill in that class, False if it is not.
     """
 
-    def Check_time_slot(_date: int, _start: int, _end: int) -> bool:
+    def Check_time_slot(_weeks: str, _date: int, _start: int, _end: int) -> bool:
         """
         Check if that slot in calendar is safe/empty to fill in a subject.
 
         Args:
+            _weeks (str): Weeks from 1 to 44
             _date (int): Weekdays from Mon to Sun (2-8).
             _start (int): The start time.
             _end (int): The end time.
@@ -177,41 +187,44 @@ def Check(dataframe: pd.DataFrame, _calendar: np.ndarray, class_id: int) -> bool
         Returns:
             bool: True if it is empty/safe, False if it is occupied.
         """
-        for i in range(_start, _end + 1):  # Nếu lướt qua mà có thấy có môn học ở thời gian này thì trả về False
-            if _calendar[_date][i] == 1:
-                return False
-        for i in range(_start, _end + 1):  # Hơi cồng kềnh nma ko muốn điền vào vòng lặp trước đấy =))
-            _calendar[_date][i] = 1
+        for _week in _weeks.split(","):
+            for i in range(_start, _end + 1):  # Nếu lướt qua mà có thấy có môn học ở thời gian này thì trả về False
+                if _calendar[int(_week)][_date][i] == 1:
+                    return False
+        for _week in _weeks.split(","):
+            for i in range(_start, _end + 1):  # Hơi cồng kềnh nma ko muốn điền vào vòng lặp trước đấy =))
+                _calendar[int(_week)][_date][i] = 1
         return True
     # Kiểm tra lịch cho lớp `BT`/ `LT+BT`
     row = dataframe[dataframe["Mã lớp"] == class_id]  # Tìm hàng có "Mã lớp" == mã lớp bài tập đang chọn
-    # week = row["Tuần"].values[0]  #TODO: Cần phải format tuần
+    weeks = row["Tuần"].values[0]  # TODO: Cần phải format tuần
     date = int(row["Thứ"].values[0])  # Tìm thứ
     start = int(row["Bắt đầu"].values[0])  # Tìm giờ bắt đầu
     end = int(row["Kết thúc"].values[0])  # Tìm giờ kết thúc
-    if not Check_time_slot(date, start, end):
+    if not Check_time_slot(weeks, date, start, end):
         return False
     # Kiểm tra lịch cho lớp `LT+BT` nếu nó có 2 buổi học
     if len(row["Thứ"].values) > 1:
+        weeks = row["Tuần"].values[0]  # TODO: Cần phải format tuần
         date = int(row["Thứ"].values[1])  # Tìm thứ
         start = int(row["Bắt đầu"].values[1])  # Tìm giờ bắt đầu
         end = int(row["Kết thúc"].values[1])  # Tìm giờ kết thúc
-        if not Check_time_slot(date, start, end):
+        if not Check_time_slot(weeks, date, start, end):
             return False
     # Kiểm tra lịch cho lớp `LT` đi kèm với lớp `BT` đã chọn
     if int(row["Mã lớp kèm"].values[0]) != class_id:
         row = dataframe[dataframe["Mã lớp"] == int(row["Mã lớp kèm"])]
-        # week = int(row["Tuần"].values[0])  #TODO: Cần phải format tuần
+        weeks = row["Tuần"].values[0]  # TODO: Cần phải format tuần
         date = int(row["Thứ"].values[0])  # Tìm thứ
         start = int(row["Bắt đầu"].values[0])  # Tìm giờ bắt đầu
         end = int(row["Kết thúc"].values[0])  # Tìm giờ kết thúc
-        if not Check_time_slot(date, start, end):
+        if not Check_time_slot(weeks, date, start, end):
             return False
 
     return True
 
 
-def Generate_population(k: int, dataframe, ma_hps: dict, _calendar=np.zeros((9, 15)), _calendar_state: list = [],
+def Generate_population(k: int, dataframe, ma_hps: dict, _calendar=np.zeros((45, 9, 15)), _calendar_state: list = [],
                         _solution: list = [], _population: list = [], _population_num: int = 10) -> list:
     """
     Finding the first generation for the problem.
@@ -220,7 +233,7 @@ def Generate_population(k: int, dataframe, ma_hps: dict, _calendar=np.zeros((9, 
         k (int): The index of subjects.
         dataframe (pd.DataFrame): Filtered_data.
         ma_hps (dict): Dictionary that have keys as subject's ID and values as subject's classes.
-        _calendar (np.ndarray): Numpy array that have weekdays from 2 to 8 and time from 1 to 14.
+        _calendar (np.ndarray): Numpy array that have weeks from 1 to 44, weekdays from 2 to 8 and time from 1 to 14.
         _calendar_state (list): Empty list to store calendars.
         _solution (list): Empty list to store suitable classes.
         _population (list): Empty list to store solutions.
@@ -267,26 +280,21 @@ def fitness(_solution: list) -> int:
     Returns:
         int: The point of the given solution, if it is high, it is likely to be the optimal solution.
     """
-    return 0
+    pass
 # TODO: Cần phải nghĩ ra tiêu chí để xét điểm
 
 
-def Selection_pair(population: list, fitness_func) -> list:
+def Selection_pair() -> list:
     """
     Choose 2 random solution from population.
 
     Args:
-        population:
-        fitness_func:
+
 
     Returns:
 
     """
-    return choices(
-        population=population,
-        weights=[fitness_func(genome) for genome in population],
-        k=2
-    )
+    pass
 # TODO: Cần phải hoàn thiện hàm Selection_pair()
 
 
